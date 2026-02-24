@@ -87,14 +87,14 @@
     </div>
 </div>
 
-<script>
+  <script>
+    // VOTRE LIEN GOOGLE SCRIPT (Bien vérifier qu'il finit par /exec)
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
 
+    // --- CONNEXION ---
     async function connexion() {
         const u = document.getElementById('user_login').value.trim();
-        const p = document.getElementById('pass_login').value;
-        // Simulation de connexion pour aller vite
         if(u) {
             localStorage.setItem('session_patient', u);
             lancerApplication(u);
@@ -106,167 +106,90 @@
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
+        // Génère le QR Code avec le lien de votre site GitHub
         new QRCode(document.getElementById("qrcode"), { text: window.location.href, width: 70, height: 70 });
         chargerHistorique();
     }
 
-async function chargerHistorique() {
-    try {
-        const resp = await fetch(`${API_URL}?sheet=Mesures`);
-        const data = await resp.json();
-       
-        // 1. Filtrer les données du patient
-        const mesDonnees = data.filter(d => d.nom === patientActuel);
-       
-        // 2. Remplir le tableau (ton code actuel)
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = mesDonnees.reverse().map(d => `
-            <tr>
-                <td>${d.date || ''}</td>
-                <td>${d.tension || ''}</td>
-                <td>${d.spo2 || ''}</td>
-                <td>${d.pouls || ''}</td>
-                <td>${d.sucre || ''}</td>
-            </tr>
-        `).join('');
+    // --- ENREGISTRER UNE MESURE ---
+    async function ajouterMesure() {
+        const data = {
+            nom: patientActuel,
+            tension: document.getElementById('tension').value,
+            spo2: document.getElementById('spo2').value,
+            pouls: document.getElementById('pouls').value,
+            sucre: document.getElementById('sucre').value
+        };
 
-        // 3. LANCER LE GRAPHIQUE AUTOMATIQUEMENT
-        if (mesDonnees.length > 0) {
-            dessinerEvolution(mesDonnees);
+        try {
+            // Envoi vers Google Sheets
+            await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important pour Google Scripts
+                body: JSON.stringify(data)
+            });
+            alert("Mesure enregistrée !");
+            location.reload(); // Recharge pour voir l'historique
+        } catch (e) {
+            alert("Erreur d'enregistrement");
         }
-
-    } catch (e) {
-        console.error("Erreur lors du chargement des données", e);
     }
-}
 
-   
+    // --- CHARGER L'HISTORIQUE ---
+    async function chargerHistorique() {
+        try {
+            const resp = await fetch(API_URL);
+            const data = await resp.json();
+            
+            // Filtrer pour n'afficher que "rim ayari" par exemple
+            const mesDonnees = data.filter(d => d.nom === patientActuel);
+            
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = mesDonnees.reverse().map(d => `
+                <tr>
+                    <td>${d.date || ''}</td>
+                    <td>${d.tension || ''}</td>
+                    <td>${d.spo2 || ''}</td>
+                    <td>${d.pouls || ''}</td>
+                    <td>${d.sucre || ''}</td>
+                </tr>
+            `).join('');
+
+            if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
+        } catch (e) {
+            console.log("En attente de nouvelles données...");
+        }
+    }
+
+    // --- GRAPHIQUE ---
+    function dessinerEvolution(donnees) {
+        const ctx = document.getElementById('santeChart').getContext('2d');
+        const dernieres = donnees.slice(-7);
+        if (window.monGraphique) window.monGraphique.destroy();
+        window.monGraphique = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dernieres.map(d => d.date.split(' ')[0]),
+                datasets: [{
+                    label: 'Glycémie (g/L)',
+                    data: dernieres.map(d => parseFloat(d.sucre) || 0),
+                    borderColor: '#3498db',
+                    fill: false
+                }]
+            }
+        });
+    }
 
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
-
+    
     window.onload = () => {
         const s = localStorage.getItem('session_patient');
         if(s) lancerApplication(s);
     };
-   
-    // ... (gardez vos fonctions connexion et ajouterMesure)
-
-    function envoyerWhatsApp() {
-        const nom = document.getElementById('nomAffiche').innerText;
-        const t = document.getElementById('tension').value;
-        const o = document.getElementById('spo2').value;
-        const c = document.getElementById('pouls').value;
-        const g = document.getElementById('sucre').value;
-
-        const message = `SOS Santé - ${nom}%0A- Tension: ${t}%0A- Oxygène: ${o}%25%0A- Cœur: ${c} BPM%0A- Sucre: ${g} g/L`;
-       
-        // Cette ligne ouvre WhatsApp avec le message prêt
-        window.open(`https://wa.me/?text=${message}`, '_blank');
-    }
-
-    function envoyerEmail() {
-        const nom = document.getElementById('nomAffiche').innerText;
-        const t = document.getElementById('tension').value;
-        const message = `Mesures de santé pour ${nom}:\nTension: ${t}\nOxygène: ${document.getElementById('spo2').value}%`;
-       
-        // Cette ligne ouvre votre application Email
-        window.location.href = `mailto:?subject=Urgence Santé - ${nom}&body=${encodeURIComponent(message)}`;
-    }
-   
-    function dessinerEvolution(donnees) {
-    const ctx = document.getElementById('santeChart').getContext('2d');
-   
-    // On prend les 7 dernières mesures
-    const dernieres = donnees.slice(-7);
-   
-    if (window.monGraphique) { window.monGraphique.destroy(); }
-
-    window.monGraphique = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dernieres.map(d => d.date.split(' ')[0]), // Affiche juste le jour
-            datasets: [{
-                label: 'Glycémie (g/L)',
-                data: dernieres.map(d => parseFloat(d.sucre)),
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: { responsive: true }
-    });
-}
-async function partagerLeQR() {
-    // 1. On récupère le canvas du QR code
-    const canvas = document.querySelector('#qrcode canvas');
-    if (!canvas) {
-        alert("Générez d'abord le QR code");
-        return;
-    }
-
-    // 2. Conversion en image (blob)
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    const fichier = new File([blob], 'mon_qr_sante.png', { type: 'image/png' });
-
-    // 3. Partage via le menu du téléphone
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'Ma Carte d\'Urgence',
-                text: 'Voici mes informations médicales en cas d\'urgence.',
-                files: [fichier]
-            });
-        } catch (err) {
-            console.log("Partage annulé");
-        }
-    } else {
-        alert("Votre téléphone ne supporte pas le partage direct. Faites une capture d'écran.");
-    }
-}
-
-// --- FONCTION GRAPHIQUE ---
-function dessinerEvolution(donnees) {
-    const ctx = document.getElementById('santeChart').getContext('2d');
-    const dernieres = donnees.slice(-7); // Les 7 derniers jours
-
-    if (window.monGraphique) { window.monGraphique.destroy(); }
-
-    window.monGraphique = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dernieres.map(d => d.date.split(' ')[0]),
-            datasets: [{
-                label: 'Glycémie (g/L)',
-                data: dernieres.map(d => parseFloat(d.sucre) || 0),
-                borderColor: '#3498db',
-                tension: 0.4,
-                fill: false
-            }]
-        }
-    });
-}
-
-// --- FONCTION PARTAGE QR ---
-async function partagerLeQR() {
-    const canvas = document.querySelector('#qrcode canvas');
-    if (!canvas) return alert("QR Code introuvable");
-
-    canvas.toBlob(async (blob) => {
-        const fichier = new File([blob], 'mon_qr.png', { type: 'image/png' });
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Ma Carte d\'Urgence',
-                    files: [fichier]
-                });
-            } catch (err) { console.log("Partage annulé"); }
-        } else {
-            alert("Capture d'écran nécessaire pour partager.");
-        }
-    });
-}
 </script>
+
+        
+    
 </body>
 </html>
 
