@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Carnet de Santé Sécurisé</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .emergency-card { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-save { background: #34495e; color: white; }
+        .btn-action { color: white; display: inline-block; width: 48%; }
+        .hidden { display: none; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; }
+        #qrcode { background: white; padding: 5px; border-radius: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="auth-section" class="card">
+        <h2>🔐 Connexion</h2>
+        <input type="text" id="user_login" placeholder="Nom et Prénom">
+        <input type="password" id="pass_login" placeholder="Mot de passe">
+        <button onclick="connexion()" class="btn-save">Se Connecter</button>
+    </div>
+
+    <div id="main-content" class="hidden">
+        <div class="emergency-card">
+            <h2>CARTE D'URGENCE 🆘</h2>
+            <div id="nomAffiche" style="font-size: 20px; font-weight: bold;">Patient : ...</div>
+            <input type="text" id="allergies" placeholder="Pathologie / Allergies">
+            <input type="text" id="telDocteur" placeholder="📞 Tél Docteur">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px;">
+                <div id="qrcode"></div>
+               
+   <button onclick="partagerLeQR()" style="background:#8e44ad; color:white;">📤 Partager mon QR</button>
+            
+                <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.3); color:white; padding:5px 10px;">🏃 Déconnexion</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>➕ Nouvelle Mesure</h3>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="tension" placeholder="Tension">
+                <input type="number" id="spo2" placeholder="Oxygène %">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="pouls" placeholder="Cœur">
+                <input type="number" step="0.01" id="sucre" placeholder="Sucre">
+            </div>
+            <button class="btn-save" onclick="ajouterMesure()">Enregistrer</button>
+            <div style="display:flex; justify-content: space-between;">
+                <button onclick="envoyerWhatsApp()" class="btn-action" style="background:#25D366;">💬 WhatsApp</button>
+                <button onclick="envoyerEmail()" class="btn-action" style="background:#ea4335;">📧 Email</button>
+            </div>
+        </div>
+       
+     <div class="card">
+    <h3>📈 Évolution (7 derniers jours)</h3>
+    <canvas id="santeChart"></canvas>
+</div>
+  
+
+        <div class="card">
+            <h3>📁 Ajouter une Analyse</h3>
+            <input type="text" id="titreAnalyse" placeholder="Titre de l'analyse">
+            <input type="text" id="lienAnalyse" placeholder="Lien du document">
+            <button class="btn-save" style="background:#3498db;" onclick="ajouterAnalyse()">Sauvegarder</button>
+        </div>
+
+        <div class="card">
+            <h3>📒 Historique</h3>
+            <table>
+                <thead><tr><th>Date</th><th>Tens.</th><th>Oxy.</th><th>Cœur</th><th>Sucre</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbww8FN2m_Dwjgn_PH92k-lycmMz0VjdGyBtpuOPa5FU7ItgmASlZXl064a3Zdp3c7GB/exec";
+    let patientActuel = "";
+
+    async function connexion() {
+        const u = document.getElementById('user_login').value.trim();
+        const p = document.getElementById('pass_login').value;
+        // Simulation de connexion pour aller vite
+        if(u) {
+            localStorage.setItem('session_patient', u);
+            lancerApplication(u);
+        }
+    }
+
+    function lancerApplication(pseudo) {
+        patientActuel = pseudo;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
+        new QRCode(document.getElementById("qrcode"), { text: window.location.href, width: 70, height: 70 });
+        chargerHistorique();
+    }
+
+async function chargerHistorique() {
+    try {
+        const resp = await fetch(`${API_URL}?sheet=Mesures`);
+        const data = await resp.json();
+       
+        // 1. Filtrer les données du patient
+        const mesDonnees = data.filter(d => d.nom === patientActuel);
+       
+        // 2. Remplir le tableau (ton code actuel)
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = mesDonnees.reverse().map(d => `
+            <tr>
+                <td>${d.date || ''}</td>
+                <td>${d.tension || ''}</td>
+                <td>${d.spo2 || ''}</td>
+                <td>${d.pouls || ''}</td>
+                <td>${d.sucre || ''}</td>
+            </tr>
+        `).join('');
+
+        // 3. LANCER LE GRAPHIQUE AUTOMATIQUEMENT
+        if (mesDonnees.length > 0) {
+            dessinerEvolution(mesDonnees);
+        }
+
+    } catch (e) {
+        console.error("Erreur lors du chargement des données", e);
+    }
+}
+
+   
+
+    function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
+
+    window.onload = () => {
+        const s = localStorage.getItem('session_patient');
+        if(s) lancerApplication(s);
+    };
+   
+    // ... (gardez vos fonctions connexion et ajouterMesure)
+
+    function envoyerWhatsApp() {
+        const nom = document.getElementById('nomAffiche').innerText;
+        const t = document.getElementById('tension').value;
+        const o = document.getElementById('spo2').value;
+        const c = document.getElementById('pouls').value;
+        const g = document.getElementById('sucre').value;
+
+        const message = `SOS Santé - ${nom}%0A- Tension: ${t}%0A- Oxygène: ${o}%25%0A- Cœur: ${c} BPM%0A- Sucre: ${g} g/L`;
+       
+        // Cette ligne ouvre WhatsApp avec le message prêt
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+    }
+
+    function envoyerEmail() {
+        const nom = document.getElementById('nomAffiche').innerText;
+        const t = document.getElementById('tension').value;
+        const message = `Mesures de santé pour ${nom}:\nTension: ${t}\nOxygène: ${document.getElementById('spo2').value}%`;
+       
+        // Cette ligne ouvre votre application Email
+        window.location.href = `mailto:?subject=Urgence Santé - ${nom}&body=${encodeURIComponent(message)}`;
+    }
+   
+    function dessinerEvolution(donnees) {
+    const ctx = document.getElementById('santeChart').getContext('2d');
+   
+    // On prend les 7 dernières mesures
+    const dernieres = donnees.slice(-7);
+   
+    if (window.monGraphique) { window.monGraphique.destroy(); }
+
+    window.monGraphique = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dernieres.map(d => d.date.split(' ')[0]), // Affiche juste le jour
+            datasets: [{
+                label: 'Glycémie (g/L)',
+                data: dernieres.map(d => parseFloat(d.sucre)),
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+async function partagerLeQR() {
+    // 1. On récupère le canvas du QR code
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) {
+        alert("Générez d'abord le QR code");
+        return;
+    }
+
+    // 2. Conversion en image (blob)
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const fichier = new File([blob], 'mon_qr_sante.png', { type: 'image/png' });
+
+    // 3. Partage via le menu du téléphone
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Ma Carte d\'Urgence',
+                text: 'Voici mes informations médicales en cas d\'urgence.',
+                files: [fichier]
+            });
+        } catch (err) {
+            console.log("Partage annulé");
+        }
+    } else {
+        alert("Votre téléphone ne supporte pas le partage direct. Faites une capture d'écran.");
+    }
+}
+
+// --- FONCTION GRAPHIQUE ---
+function dessinerEvolution(donnees) {
+    const ctx = document.getElementById('santeChart').getContext('2d');
+    const dernieres = donnees.slice(-7); // Les 7 derniers jours
+
+    if (window.monGraphique) { window.monGraphique.destroy(); }
+
+    window.monGraphique = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dernieres.map(d => d.date.split(' ')[0]),
+            datasets: [{
+                label: 'Glycémie (g/L)',
+                data: dernieres.map(d => parseFloat(d.sucre) || 0),
+                borderColor: '#3498db',
+                tension: 0.4,
+                fill: false
+            }]
+        }
+    });
+}
+
+// --- FONCTION PARTAGE QR ---
+async function partagerLeQR() {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) return alert("QR Code introuvable");
+
+    canvas.toBlob(async (blob) => {
+        const fichier = new File([blob], 'mon_qr.png', { type: 'image/png' });
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Ma Carte d\'Urgence',
+                    files: [fichier]
+                });
+            } catch (err) { console.log("Partage annulé"); }
+        } else {
+            alert("Capture d'écran nécessaire pour partager.");
+        }
+    });
+}
+</script>
+</body>
+</html>
+
+
