@@ -81,13 +81,15 @@
     <h3>📒 Historique</h3>
     <table>
         <thead>
-            <tr>
-                <th>Date</th>
-                <th>Tens.</th>
-                <th>Oxy.</th>
-                <th>Cœur</th>
-                <th>Sucre</th> </tr>
-        </thead>
+    <tr>
+        <th>Date</th>
+        <th>Tens.</th>
+        <th>Oxy.</th>
+        <th>Cœur</th>
+        <th>Sucre</th> </tr>
+</thead>
+
+        
         <tbody id="table-body"></tbody>
     </table>
 </div>
@@ -184,8 +186,8 @@ async function chargerHistorique() {
                 <td>${d.tension || ''}</td>
                 <td>${d.spo2 || ''}</td>
                 <td>${d.pouls || ''}</td>
-                <td style="font-weight: bold; color: #2980b9;">${d.sucre || '-'}</td>
-            </tr>
+                <td>${d.sucre || ''}</td> </tr>
+                
         `).join('');
 
         if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
