@@ -176,28 +176,31 @@ async function chargerHistorique() {
         const resp = await fetch(API_URL);
         const data = await resp.json();
         
-        // Filtrer les données du patient actuel
         const mesDonnees = data.filter(d => d.nom === patientActuel);
-        
         const tbody = document.getElementById('table-body');
-        tbody.innerHTML = mesDonnees.reverse().map(d => `
-    <tr>
-        <td>${d.date || ''}</td>
-        <td>${d.tension || ''}</td>
-        <td>${d.spo2 || ''}</td>
-        <td>${d.pouls || ''}</td>
-        <td>${d.sucre || ''}</td> </tr>
-`).join('');
-
         
+        tbody.innerHTML = mesDonnees.reverse().map(d => {
+            // On raccourcit la date pour gagner de la place (ex: 25/02)
+            const dateCourte = d.date ? d.date.substring(8,10) + '/' + d.date.substring(5,7) : '';
+            
+            return `
+                <tr>
+                    <td style="font-size:10px">${dateCourte}</td>
+                    <td>${d.tension || '-'}</td>
+                    <td>${d.spo2 || '-'}</td>
+                    <td>${d.pouls || '-'}</td>
+                    <td style="font-weight:bold; color:#2c3e50;">${d.sucre || '-'}</td>
+                </tr>
+            `;
+        }).join('');
 
         if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
     } catch (e) {
-        console.log("Erreur de lecture : Vérifiez le nom des colonnes dans Sheets");
+        console.log("Erreur de lecture des données");
     }
 }
 
-                
+      
 
 
 function dessinerEvolution(donnees) {
