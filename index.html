@@ -254,15 +254,20 @@ function verifierSeuils(sucre, tension) {
 
 // À ajouter à l'intérieur de votre fonction ajouterMesure()
 // verifierSeuils(document.getElementById('sucre').value, document.getElementById('tension').value);
-  
-    // --- ENVOYER PAR WHATSAPP ---
+
+// --- ENVOYER PAR WHATSAPP ---
 function envoyerWhatsApp() {
     const t = document.getElementById('tension').value;
     const s = document.getElementById('sucre').value;
     const o = document.getElementById('spo2').value;
     const p = document.getElementById('pouls').value;
 
-    const message = `Santé de ${patientActuel} : %0A- Tension: ${t}%0A- Sucre: ${s} g/L%0A- Oxygène: ${o}%%0A- Pouls: ${p} bpm`;
+    if (!t || !s) {
+        alert("⚠️ Remplissez d'abord les cases avant de cliquer sur WhatsApp");
+        return;
+    }
+
+    const message = `Santé de ${patientActuel} :%0A- Tension: ${t}%0A- Sucre: ${s} g/L%0A- Oxygène: ${o}%%0A- Pouls: ${p} bpm`;
     window.open(`https://wa.me/?text=${message}`, '_blank');
 }
 
@@ -273,13 +278,18 @@ function envoyerEmail() {
     const o = document.getElementById('spo2').value;
     const p = document.getElementById('pouls').value;
 
+    if (!t || !s) {
+        alert("⚠️ Remplissez d'abord les cases avant de cliquer sur Email");
+        return;
+    }
+
     const sujet = `Mesures de santé - ${patientActuel}`;
     const corps = `Voici mes dernières mesures : \n- Tension: ${t}\n- Sucre: ${s} g/L\n- Oxygène: ${o}%\n- Pouls: ${p} bpm`;
     
     window.location.href = `mailto:?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
 }
-
-
+      
+    
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
     
     window.onload = () => {
