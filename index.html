@@ -161,24 +161,55 @@
         }
     }
 
-    // --- GRAPHIQUE ---
-    function dessinerEvolution(donnees) {
-        const ctx = document.getElementById('santeChart').getContext('2d');
-        const dernieres = donnees.slice(-7);
-        if (window.monGraphique) window.monGraphique.destroy();
-        window.monGraphique = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dernieres.map(d => d.date.split(' ')[0]),
-                datasets: [{
-                    label: 'Glycémie (g/L)',
-                    data: dernieres.map(d => parseFloat(d.sucre) || 0),
-                    borderColor: '#3498db',
-                    fill: false
-                }]
-            }
-        });
+function dessinerEvolution(donnees) {
+    const ctx = document.getElementById('santeChart').getContext('2d');
+    const dernieres = donnees.slice(-7); // Affiche les 7 dernières mesures
+
+    if (window.monGraphique) { window.monGraphique.destroy(); }
+
+    window.monGraphique = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dernieres.map(d => d.date.split(' ')[0]), 
+            datasets: [{
+                label: 'Glycémie (g/L)',
+                data: dernieres.map(d => parseFloat(d.sucre) || 0),
+                borderColor: '#3498db', // Bleu pro
+                backgroundColor: 'rgba(52, 152, 219, 0.1)', // Ombrage sous la courbe
+                fill: true,
+                tension: 0.4, // Courbe arrondie
+                pointRadius: 4
+            }]
+        },
+        options: { 
+            responsive: true,
+            plugins: { legend: { display: false } } // Design épuré
+        }
+    });
+}
+
+    // Fonction de vérification automatique
+function verifierSeuils(sucre, tension) {
+    let messageAlerte = "";
+    const s = parseFloat(sucre);
+    const t = parseInt(tension.split('/')[0]); // Prend le premier chiffre de la tension
+
+    if (s > 1.26) messageAlerte += "🛑 Glycémie élevée ! ";
+    if (t > 14) messageAlerte += "⚠️ Tension haute ! ";
+
+    if (messageAlerte !== "") {
+        const alerteDiv = document.getElementById('health-alert') || document.createElement('div');
+        alerteDiv.id = 'health-alert';
+        alerteDiv.style = "background:#fee; color:#c00; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; text-align:center;";
+        alerteDiv.innerHTML = messageAlerte;
+        document.querySelector('.card').prepend(alerteDiv); // Affiche l'alerte en haut du formulaire
     }
+}
+
+// À ajouter à l'intérieur de votre fonction ajouterMesure()
+// verifierSeuils(document.getElementById('sucre').value, document.getElementById('tension').value);
+  
+    
 
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
     
