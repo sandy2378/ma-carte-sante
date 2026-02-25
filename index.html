@@ -111,6 +111,30 @@
         chargerHistorique();
     }
 
+function verifierSante(sucre, tension) {
+    const s = parseFloat(sucre);
+    const t = parseInt(tension.split('/')[0]); // Récupère le premier chiffre de la tension (ex: 12)
+    let message = "";
+
+    // Seuils personnalisables
+    if (s > 1.26) message += "⚠️ Glycémie élevée ";
+    if (t > 14) message += "⚠️ Tension haute ";
+    
+    const alerteBox = document.getElementById('health-alert');
+    if (message) {
+        alerteBox.innerText = message;
+        alerteBox.style.display = "block";
+        alerteBox.style.background = "#ffcccc";
+        alerteBox.style.color = "#cc0000";
+        alerteBox.style.padding = "10px";
+        alerteBox.style.borderRadius = "10px";
+        alerteBox.style.marginBottom = "10px";
+    } else {
+        alerteBox.style.display = "none";
+    }
+}
+
+      
     // --- ENREGISTRER UNE MESURE ---
     async function ajouterMesure() {
         const data = {
@@ -163,30 +187,34 @@
 
 function dessinerEvolution(donnees) {
     const ctx = document.getElementById('santeChart').getContext('2d');
-    const dernieres = donnees.slice(-7); // Affiche les 7 dernières mesures
+    const dernieres = donnees.slice(-7); // Affiche les 7 derniers jours
 
     if (window.monGraphique) { window.monGraphique.destroy(); }
 
     window.monGraphique = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: dernieres.map(d => d.date.split(' ')[0]), 
+            labels: dernieres.map(d => d.date.split(' ')[0]),
             datasets: [{
                 label: 'Glycémie (g/L)',
                 data: dernieres.map(d => parseFloat(d.sucre) || 0),
-                borderColor: '#3498db', // Bleu pro
-                backgroundColor: 'rgba(52, 152, 219, 0.1)', // Ombrage sous la courbe
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)', // Effet de remplissage bleu pro
                 fill: true,
-                tension: 0.4, // Courbe arrondie
-                pointRadius: 4
+                tension: 0.4, // Courbe fluide
+                pointRadius: 5,
+                pointBackgroundColor: '#2980b9'
             }]
         },
-        options: { 
+        options: {
             responsive: true,
-            plugins: { legend: { display: false } } // Design épuré
+            plugins: { legend: { display: false } }
         }
     });
 }
+
+      
+
 
     // Fonction de vérification automatique
 function verifierSeuils(sucre, tension) {
