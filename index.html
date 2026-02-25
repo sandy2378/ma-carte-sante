@@ -77,16 +77,24 @@
             <input type="text" id="lienAnalyse" placeholder="Lien du document">
             <button class="btn-save" style="background:#3498db;" onclick="ajouterAnalyse()">Sauvegarder</button>
         </div>
-
-        <div class="card">
-            <h3>📒 Historique</h3>
-            <table>
-                <thead><tr><th>Date</th><th>Tens.</th><th>Oxy.</th><th>Cœur</th><th>Sucre</th></tr></thead>
-                <tbody id="table-body"></tbody>
-            </table>
-        </div>
-    </div>
+<div class="card">
+    <h3>📒 Historique</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Tens.</th>
+                <th>Oxy.</th>
+                <th>Cœur</th>
+                <th>Sucre</th> </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
 </div>
+
+
+        
+    
 
   <script>
     // VOTRE LIEN GOOGLE SCRIPT (Bien vérifier qu'il finit par /exec)
@@ -161,31 +169,33 @@ function verifierSante(sucre, tension) {
         }
     }
 
-    // --- CHARGER L'HISTORIQUE ---
-    async function chargerHistorique() {
-        try {
-            const resp = await fetch(API_URL);
-            const data = await resp.json();
-            
-            // Filtrer pour n'afficher que "rim ayari" par exemple
-            const mesDonnees = data.filter(d => d.nom === patientActuel);
-            
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = mesDonnees.reverse().map(d => `
-                <tr>
-                    <td>${d.date || ''}</td>
-                    <td>${d.tension || ''}</td>
-                    <td>${d.spo2 || ''}</td>
-                    <td>${d.pouls || ''}</td>
-                    <td>${d.sucre || ''}</td>
-                </tr>
-            `).join('');
+async function chargerHistorique() {
+    try {
+        const resp = await fetch(API_URL);
+        const data = await resp.json();
+        
+        // Filtrer les données du patient actuel
+        const mesDonnees = data.filter(d => d.nom === patientActuel);
+        
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = mesDonnees.reverse().map(d => `
+            <tr>
+                <td style="font-size: 10px;">${d.date || ''}</td>
+                <td>${d.tension || ''}</td>
+                <td>${d.spo2 || ''}</td>
+                <td>${d.pouls || ''}</td>
+                <td style="font-weight: bold; color: #2980b9;">${d.sucre || '-'}</td>
+            </tr>
+        `).join('');
 
-            if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
-        } catch (e) {
-            console.log("En attente de nouvelles données...");
-        }
+        if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
+    } catch (e) {
+        console.log("Erreur de lecture : Vérifiez le nom des colonnes dans Sheets");
     }
+}
+
+                
+
 
 function dessinerEvolution(donnees) {
     const ctx = document.getElementById('santeChart').getContext('2d');
