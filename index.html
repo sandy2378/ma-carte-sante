@@ -6,20 +6,21 @@
     <title>Mon Carnet de Santé Sécurisé</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .emergency-card { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button { width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-save { background: #34495e; color: white; }
+        .btn-save:hover { background: #2c3e50; }
         .btn-action { color: white; display: inline-block; width: 48%; }
         .hidden { display: none; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; }
         #qrcode { background: white; padding: 5px; border-radius: 5px; display: inline-block; }
+        #health-alert { font-weight: bold; text-align: center; display: none; }
     </style>
 </head>
 <body>
@@ -40,23 +41,20 @@
             <input type="text" id="telDocteur" placeholder="📞 Tél Docteur">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px;">
                 <div id="qrcode"></div>
-               
-   <button onclick="partagerLeQR()" style="background:#8e44ad; color:white;">📤 Partager mon QR</button>
-            
                 <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.3); color:white; padding:5px 10px;">🏃 Déconnexion</button>
             </div>
         </div>
 
         <div class="card">
             <h3>➕ Nouvelle Mesure</h3>
-            <div id="health-alert" style="display:none;"></div>
+            <div id="health-alert"></div>
             <div style="display:flex; gap:10px;">
-                <input type="text" id="tension" placeholder="Tension">
+                <input type="text" id="tension" placeholder="Tension (ex: 12/8)">
                 <input type="number" id="spo2" placeholder="Oxygène %">
             </div>
             <div style="display:flex; gap:10px;">
                 <input type="number" id="pouls" placeholder="Cœur">
-                <input type="number" step="0.01" id="sucre" placeholder="Sucre">
+                <input type="number" step="0.01" id="sucre" placeholder="Sucre (g/L)">
             </div>
             <button class="btn-save" onclick="ajouterMesure()">Enregistrer</button>
             <div style="display:flex; justify-content: space-between;">
@@ -65,46 +63,34 @@
             </div>
         </div>
        
-     <div class="card">
-    <h3>📈 Évolution (7 derniers jours)</h3>
-    <canvas id="santeChart"></canvas>
-</div>
-  
+        <div class="card">
+            <h3>📈 Évolution (7 derniers jours)</h3>
+            <canvas id="santeChart"></canvas>
+        </div>
 
         <div class="card">
-            <h3>📁 Ajouter une Analyse</h3>
-            <input type="text" id="titreAnalyse" placeholder="Titre de l'analyse">
-            <input type="text" id="lienAnalyse" placeholder="Lien du document">
-            <button class="btn-save" style="background:#3498db;" onclick="ajouterAnalyse()">Sauvegarder</button>
+            <h3>📒 Historique</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Tens.</th>
+                        <th>Oxy.</th>
+                        <th>Cœur</th>
+                        <th>Sucre</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
         </div>
-<div class="card">
-    <h3>📒 Historique</h3>
-    <table>
-        <thead>
-    <tr>
-        <th>Date</th>
-        <th>Tens.</th>
-        <th>Oxy.</th>
-        <th>Cœur</th>
-        <th>Sucre</th> </tr>
-</thead>
-
-        
-        <tbody id="table-body"></tbody>
-    </table>
+    </div>
 </div>
 
-
-        
-    
-
-  <script>
-    // VOTRE LIEN GOOGLE SCRIPT (Bien vérifier qu'il finit par /exec)
+<script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
 
-    // --- CONNEXION ---
-    async function connexion() {
+    function connexion() {
         const u = document.getElementById('user_login').value.trim();
         if(u) {
             localStorage.setItem('session_patient', u);
@@ -117,183 +103,118 @@
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
-        // Génère le QR Code avec le lien de votre site GitHub
         new QRCode(document.getElementById("qrcode"), { text: window.location.href, width: 70, height: 70 });
         chargerHistorique();
     }
 
-function verifierSante(sucre, tension) {
-    const s = parseFloat(sucre);
-    const t = parseInt(tension.split('/')[0]); // Récupère le premier chiffre de la tension (ex: 12)
-    let message = "";
+    function verifierSante(sucre, tension) {
+        const s = parseFloat(sucre);
+        const t = parseInt(tension);
+        let message = "";
+        const alerteBox = document.getElementById('health-alert');
 
-    // Seuils personnalisables
-    if (s > 1.26) message += "⚠️ Glycémie élevée ";
-    if (t > 14) message += "⚠️ Tension haute ";
-    
-    const alerteBox = document.getElementById('health-alert');
-    if (message) {
-        alerteBox.innerText = message;
-        alerteBox.style.display = "block";
-        alerteBox.style.background = "#ffcccc";
-        alerteBox.style.color = "#cc0000";
-        alerteBox.style.padding = "10px";
-        alerteBox.style.borderRadius = "10px";
-        alerteBox.style.marginBottom = "10px";
-    } else {
-        alerteBox.style.display = "none";
+        if (s > 1.26) message += "⚠️ Glycémie élevée ";
+        if (t > 14) message += "⚠️ Tension haute ";
+        
+        if (message) {
+            alerteBox.innerText = message;
+            alerteBox.style.display = "block";
+            alerteBox.style.background = "#ffcccc";
+            alerteBox.style.color = "#cc0000";
+            alerteBox.style.padding = "10px";
+            alerteBox.style.borderRadius = "10px";
+            alerteBox.style.marginBottom = "10px";
+        } else {
+            alerteBox.style.display = "none";
+        }
     }
-}
 
-      
-    // --- ENREGISTRER UNE MESURE ---
     async function ajouterMesure() {
-        verifierSante(document.getElementById('sucre').value, document.getElementById('tension').value);
+        const tension = document.getElementById('tension').value;
+        const sucre = document.getElementById('sucre').value;
+        const spo2 = document.getElementById('spo2').value;
+        const pouls = document.getElementById('pouls').value;
+
+        if(!tension || !sucre) return alert("Veuillez remplir les champs principaux.");
+
+        verifierSante(sucre, tension);
+
         const data = {
             nom: patientActuel,
-            tension: document.getElementById('tension').value,
-            spo2: document.getElementById('spo2').value,
-            pouls: document.getElementById('pouls').value,
-            sucre: document.getElementById('sucre').value
+            tension: tension,
+            spo2: spo2,
+            pouls: pouls,
+            sucre: sucre
         };
 
         try {
-            // Envoi vers Google Sheets
             await fetch(API_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Important pour Google Scripts
+                mode: 'no-cors',
                 body: JSON.stringify(data)
             });
-            alert("Mesure enregistrée !");
-            location.reload(); // Recharge pour voir l'historique
+            alert("✅ Mesure envoyée à Google Sheets !");
+            setTimeout(() => { location.reload(); }, 500);
         } catch (e) {
-            alert("Erreur d'enregistrement");
+            alert("❌ Erreur de connexion");
         }
     }
 
-async function chargerHistorique() {
-    try {
-        const resp = await fetch(API_URL);
-        const data = await resp.json();
-        
-        const mesDonnees = data.filter(d => d.nom === patientActuel);
-        const tbody = document.getElementById('table-body');
-        
-        tbody.innerHTML = mesDonnees.reverse().map(d => {
-            // On raccourcit la date pour gagner de la place (ex: 25/02)
-            const dateCourte = d.date ? d.date.substring(8,10) + '/' + d.date.substring(5,7) : '';
+    async function chargerHistorique() {
+        try {
+            const resp = await fetch(API_URL);
+            const data = await resp.json();
+            const mesDonnees = data.filter(d => d.nom === patientActuel);
+            const tbody = document.getElementById('table-body');
             
-            return `
-                <tr>
-                    <td style="font-size:10px">${dateCourte}</td>
+            tbody.innerHTML = mesDonnees.reverse().map(d => {
+                const dateC = d.date ? d.date.substring(8,10)+'/'+d.date.substring(5,7) : '--';
+                return `<tr>
+                    <td>${dateC}</td>
                     <td>${d.tension || '-'}</td>
                     <td>${d.spo2 || '-'}</td>
                     <td>${d.pouls || '-'}</td>
-                    <td style="font-weight:bold; color:#2c3e50;">${d.sucre || '-'}</td>
-                </tr>
-            `;
-        }).join('');
+                    <td style="font-weight:bold;">${d.sucre || '-'}</td>
+                </tr>`;
+            }).join('');
 
-        if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
-    } catch (e) {
-        console.log("Erreur de lecture des données");
+            if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
+        } catch (e) { console.log("Chargement..."); }
     }
-}
 
-      
-
-
-function dessinerEvolution(donnees) {
-    const ctx = document.getElementById('santeChart').getContext('2d');
-    const dernieres = donnees.slice(-7); // Affiche les 7 derniers jours
-
-    if (window.monGraphique) { window.monGraphique.destroy(); }
-
-    window.monGraphique = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dernieres.map(d => d.date.split(' ')[0]),
-            datasets: [{
-                label: 'Glycémie (g/L)',
-                data: dernieres.map(d => parseFloat(d.sucre) || 0),
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.2)', // Effet de remplissage bleu pro
-                fill: true,
-                tension: 0.4, // Courbe fluide
-                pointRadius: 5,
-                pointBackgroundColor: '#2980b9'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
-        }
-    });
-}
-
-      
-
-
-    // Fonction de vérification automatique
-function verifierSeuils(sucre, tension) {
-    let messageAlerte = "";
-    const s = parseFloat(sucre);
-    const t = parseInt(tension.split('/')[0]); // Prend le premier chiffre de la tension
-
-    if (s > 1.26) messageAlerte += "🛑 Glycémie élevée ! ";
-    if (t > 14) messageAlerte += "⚠️ Tension haute ! ";
-
-    if (messageAlerte !== "") {
-        const alerteDiv = document.getElementById('health-alert') || document.createElement('div');
-        alerteDiv.id = 'health-alert';
-        alerteDiv.style = "background:#fee; color:#c00; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; text-align:center;";
-        alerteDiv.innerHTML = messageAlerte;
-        document.querySelector('.card').prepend(alerteDiv); // Affiche l'alerte en haut du formulaire
+    function dessinerEvolution(donnees) {
+        const ctx = document.getElementById('santeChart').getContext('2d');
+        const dernieres = donnees.slice(-7);
+        if (window.monGraphique) { window.monGraphique.destroy(); }
+        window.monGraphique = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dernieres.map(d => d.date.substring(8,10)+'/'+d.date.substring(5,7)),
+                datasets: [{
+                    label: 'Glycémie (g/L)',
+                    data: dernieres.map(d => parseFloat(d.sucre) || 0),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            }
+        });
     }
-}
 
-// À ajouter à l'intérieur de votre fonction ajouterMesure()
-// verifierSeuils(document.getElementById('sucre').value, document.getElementById('tension').value);
+    function envoyerWhatsApp() {
+        const message = `Santé de ${patientActuel} :%0A- Tension: ${document.getElementById('tension').value}%0A- Sucre: ${document.getElementById('sucre').value} g/L`;
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+    }
 
-function envoyerWhatsApp() {
-    const t = document.getElementById('tension').value;
-    const s = document.getElementById('sucre').value;
-    const o = document.getElementById('spo2').value;
-    const p = document.getElementById('pouls').value;
+    function envoyerEmail() {
+        const sujet = `Mesures de santé - ${patientActuel}`;
+        const corps = `Tension: ${document.getElementById('tension').value}\nSucre: ${document.getElementById('sucre').value} g/L`;
+        window.location.href = `mailto:?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+    }
 
-    if (!t || !s) return alert("⚠️ Remplissez les mesures dans les cases avant d'envoyer !");
-
-    const message = `Santé de ${patientActuel} :%0A- Tension: ${t}%0A- Sucre: ${s} g/L%0A- Oxygène: ${o}%%0A- Pouls: ${p} bpm`;
-    window.open(`https://wa.me/?text=${message}`, '_blank');
-}
-
-function envoyerEmail() {
-    const t = document.getElementById('tension').value;
-    const s = document.getElementById('sucre').value;
-    const o = document.getElementById('spo2').value;
-    const p = document.getElementById('pouls').value;
-
-    if (!t || !s) return alert("⚠️ Remplissez les mesures dans les cases avant d'envoyer !");
-
-    const sujet = `Mesures de santé - ${patientActuel}`;
-    const corps = `Voici mes dernières mesures : \n- Tension: ${t}\n- Sucre: ${s} g/L\n- Oxygène: ${o}%\n- Pouls: ${p} bpm`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
-}
-
-      
-
-    
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
-    
-    window.onload = () => {
-        const s = localStorage.getItem('session_patient');
-        if(s) lancerApplication(s);
-    };
+    window.onload = () => { if(localStorage.getItem('session_patient')) lancerApplication(localStorage.getItem('session_patient')); };
 </script>
-
-        
-    
 </body>
 </html>
-
-
