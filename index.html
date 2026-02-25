@@ -255,7 +255,30 @@ function verifierSeuils(sucre, tension) {
 // À ajouter à l'intérieur de votre fonction ajouterMesure()
 // verifierSeuils(document.getElementById('sucre').value, document.getElementById('tension').value);
   
+    // --- ENVOYER PAR WHATSAPP ---
+function envoyerWhatsApp() {
+    const t = document.getElementById('tension').value;
+    const s = document.getElementById('sucre').value;
+    const o = document.getElementById('spo2').value;
+    const p = document.getElementById('pouls').value;
+
+    const message = `Santé de ${patientActuel} : %0A- Tension: ${t}%0A- Sucre: ${s} g/L%0A- Oxygène: ${o}%%0A- Pouls: ${p} bpm`;
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+}
+
+// --- ENVOYER PAR EMAIL ---
+function envoyerEmail() {
+    const t = document.getElementById('tension').value;
+    const s = document.getElementById('sucre').value;
+    const o = document.getElementById('spo2').value;
+    const p = document.getElementById('pouls').value;
+
+    const sujet = `Mesures de santé - ${patientActuel}`;
+    const corps = `Voici mes dernières mesures : \n- Tension: ${t}\n- Sucre: ${s} g/L\n- Oxygène: ${o}%\n- Pouls: ${p} bpm`;
     
+    window.location.href = `mailto:?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+}
+
 
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
     
