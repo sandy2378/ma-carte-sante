@@ -181,14 +181,15 @@ async function chargerHistorique() {
         
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = mesDonnees.reverse().map(d => `
-            <tr>
-                <td style="font-size: 10px;">${d.date || ''}</td>
-                <td>${d.tension || ''}</td>
-                <td>${d.spo2 || ''}</td>
-                <td>${d.pouls || ''}</td>
-                <td>${d.sucre || ''}</td> </tr>
-                
-        `).join('');
+    <tr>
+        <td>${d.date || ''}</td>
+        <td>${d.tension || ''}</td>
+        <td>${d.spo2 || ''}</td>
+        <td>${d.pouls || ''}</td>
+        <td>${d.sucre || ''}</td> </tr>
+`).join('');
+
+        
 
         if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
     } catch (e) {
