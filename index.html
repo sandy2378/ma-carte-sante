@@ -138,6 +138,7 @@ function verifierSante(sucre, tension) {
       
     // --- ENREGISTRER UNE MESURE ---
     async function ajouterMesure() {
+        verifierSante(document.getElementById('sucre').value, document.getElementById('tension').value);
         const data = {
             nom: patientActuel,
             tension: document.getElementById('tension').value,
