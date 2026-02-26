@@ -24,25 +24,29 @@
 </head>
 <body>
 <div class="container">
-    <div id="auth-section" class="card" style="text-align:center;">
+     <div id="auth-section" class="card" style="text-align:center;">
     <h2 style="color:#2c3e50;">💎 Accès Premium Santé</h2>
-    <p style="font-size: 14px; color: #7f8c8d;">Cette application est réservée aux membres Premium.</p>
+    <p style="font-size: 14px; color: #7f8c8d;">Entrez votre code ou payez par virement pour activer votre compte.</p>
     
     <input type="text" id="user_login" placeholder="Votre Nom">
     <input type="password" id="license_key" placeholder="Code d'activation">
     <button onclick="connexionPayante()" class="btn-save" style="background:#27ae60;">🚀 Activer mon accès</button>
     
-    <div style="margin:20px 0; border-top:1px solid #eee; padding-top:20px;">
-        <p style="font-weight:bold;">Pas encore de code ?</p>
-        <button onclick="window.open('https://www.paypal.me/VOTRE_PSEUDO/9.90', '_blank')" 
-                style="background:#ffc439; color:#003087; border-radius:25px; font-size:14px; border:1px solid #003087;">
-             Payer avec <b>PayPal</b>
+    <div style="margin:20px 0; border-top:1px solid #eee; padding-top:20px; background:#f9f9f9; border-radius:10px; padding:15px;">
+        <p style="font-weight:bold; color:#2c3e50; margin-top:0;">💳 Paiement par Virement Bancaire</p>
+        <p style="font-size:12px; color:#34495e; word-break:break-all;"><b>RIB :</b> TN59 12 30100 00133 06217243</p>
+        <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" 
+                style="background:#34495e; color:white; font-size:12px; padding:8px; width:auto;">
+            📋 Copier le RIB
         </button>
-        <p style="font-size:10px; margin-top:10px;">Une fois payé, envoyez-moi un message pour recevoir votre code.</p>
+        <p style="font-size:10px; margin-top:10px;">Une fois le virement effectué, envoyez votre preuve pour recevoir votre code.</p>
     </div>
 </div>
 
-    
+
+
+
+
 
     <div id="main-content" class="hidden">
         <div class="emergency-card">
@@ -108,22 +112,23 @@
     // ⚠️ REMPLACEZ PAR VOTRE LIEN GOOGLE SCRIPT (EXEC)
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
-    function connexionPayante() {
+    
+
+function connexionPayante() {
     const nom = document.getElementById('user_login').value.trim();
     const code = document.getElementById('license_key').value.trim();
     
-    // Liste des codes que vous donnez après réception du virement sur votre RIB
-    const codesAchetes = ["CLIENT01", "PAIEMENT_OK", "SANTE_PRO"];
+    // Ajoutez ici les codes que vous donnez à vos clients payants
+    const codesAchetes = ["CLIENT01", "PAIEMENT_OK", "RIM2026", "AYA2026"];
 
     if (nom && codesAchetes.includes(code)) {
         localStorage.setItem('session_patient', nom);
-        lancerApplication(nom);
+        // On appelle la fonction pour afficher le reste du site
+        lancerApplication(nom); 
     } else {
-        alert("❌ Accès refusé. Veuillez payer ou entrer un code valide.");
+        alert("❌ Code incorrect ou accès non payé.");
     }
 }
-
-
     
 
     function lancerApplication(pseudo) {
