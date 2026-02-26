@@ -56,6 +56,8 @@
             <input type="text" id="telDocteur" placeholder="📞 Tél Docteur">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px;">
                 <div id="qrcode"></div>
+                <button onclick="partagerQR()" style="background:#3498db; color:white; margin-top:10px;">📲 Partager ma Fiche QR</button>
+
                 <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.3); color:white; padding:5px 10px;">🏃 Déconnexion</button>
             </div>
         </div>
@@ -106,6 +108,34 @@
             </table>
         </div>
     </div>
+</div>
+<div class="card">
+    <h3>📁 Dossier Médical (Analyses)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Analyse</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="analyses-body"></tbody>
+    </table>
+</div>
+
+<button onclick="partagerQR()" style="background:#3498db; color:white; border-radius:10px;">📲 Partager mon QR Code</button>
+
+    
+<div class="card">
+    <h3>📁 Mes Documents & Analyses</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Lien / Action</th>
+            </tr>
+        </thead>
+        <tbody id="analyses-body"></tbody>
+    </table>
 </div>
 
 <script>
@@ -237,7 +267,51 @@ function connexionPayante() {
             location.reload();
         } catch (e) { alert("Erreur"); }
     }
+// Fonction pour partager
+function partagerQR() {
+    const msg = "Voici mon carnet de santé : " + window.location.href;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
 
+// Fonction de chargement mise à jour
+async function chargerHistorique() {
+    try {
+        const resp = await fetch(API_URL);
+        const data = await resp.json();
+        const mesDonnees = data.filter(d => d.nom === patientActuel);
+        
+        const tbody = document.getElementById('table-body');
+        const abody = document.getElementById('analyses-body'); // Cible le nouveau tableau
+        
+        tbody.innerHTML = "";
+        abody.innerHTML = "";
+
+        mesDonnees.reverse().forEach(d => {
+            // Si c'est une mesure classique (Tension, Sucre...)
+            if(d.tension !== "DOC") {
+                let dateC = d.date ? new Date(d.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) : "--";
+                tbody.innerHTML += `<tr>
+                    <td>${dateC}</td>
+                    <td>${d.tension || '-'}</td>
+                    <td>${d.spo2 || '-'}</td>
+                    <td>${d.pouls || '-'}</td>
+                    <td style="font-weight:bold;">${d.sucre || '-'}</td>
+                </tr>`;
+            } 
+            // Si c'est un document (sauvegardé avec le bouton bleu)
+            else {
+                abody.innerHTML += `<tr>
+                    <td>${d.spo2}</td> 
+                    <td><a href="${d.sucre}" target="_blank" style="color:#3498db; font-weight:bold;">📄 Ouvrir</a></td>
+                </tr>`;
+            }
+        });
+
+        if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
+    } catch (e) { console.log("Erreur de chargement"); }
+}
+
+    
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
     window.onload = () => { if(localStorage.getItem('session_patient')) lancerApplication(localStorage.getItem('session_patient')); };
 </script>
