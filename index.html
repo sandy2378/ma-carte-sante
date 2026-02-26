@@ -25,12 +25,25 @@
 <body>
 
 <div class="container">
-    <div id="auth-section" class="card">
-        <h2>🔐 Connexion</h2>
-        <input type="text" id="user_login" placeholder="Nom et Prénom">
-        <input type="password" id="pass_login" placeholder="Mot de passe">
-        <button onclick="connexion()" class="btn-save">Se Connecter</button>
+    <div id="auth-section" class="card" style="text-align:center;">
+    <h2 style="color:#2c3e50;">💎 Accès Premium Santé</h2>
+    <p style="font-size: 14px; color: #7f8c8d;">Cette application est réservée aux membres Premium.</p>
+    
+    <input type="text" id="user_login" placeholder="Votre Nom">
+    <input type="password" id="license_key" placeholder="Code d'activation">
+    <button onclick="connexionPayante()" class="btn-save" style="background:#27ae60;">🚀 Activer mon accès</button>
+    
+    <div style="margin:20px 0; border-top:1px solid #eee; padding-top:20px;">
+        <p style="font-weight:bold;">Pas encore de code ?</p>
+        <button onclick="window.open('https://www.paypal.me/VOTRE_PSEUDO/9.90', '_blank')" 
+                style="background:#ffc439; color:#003087; border-radius:25px; font-size:14px; border:1px solid #003087;">
+             Payer avec <b>PayPal</b>
+        </button>
+        <p style="font-size:10px; margin-top:10px;">Une fois payé, envoyez-moi un message pour recevoir votre code.</p>
     </div>
+</div>
+
+    
 
     <div id="main-content" class="hidden">
         <div class="emergency-card">
