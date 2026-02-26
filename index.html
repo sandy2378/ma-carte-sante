@@ -24,33 +24,46 @@
 </head>
 <body>
 <div class="container">
-     <div id="auth-section" class="card" style="text-align:center;">
+<div id="auth-section" class="card" style="text-align:center;">
     <h2 style="color:#2c3e50;">💎 Accès Premium Santé</h2>
-    <p style="font-size: 14px; color: #7f8c8d;">Entrez votre code ou payez par virement pour activer votre compte.</p>
-    
     <input type="text" id="user_login" placeholder="Votre Nom">
     <input type="password" id="license_key" placeholder="Code d'activation">
     <button onclick="connexionPayante()" class="btn-save" style="background:#27ae60;">🚀 Activer mon accès</button>
     
-    
-
-        <div style="margin:20px 0; padding-top:20px; background:#f9f9f9; border-radius:10px; padding:15px;">
-    <p style="font-weight:bold; color:#2c3e50;">💳 Paiement par Virement</p>
-    
-    <button id="btn-voir-rib" onclick="afficherRIB()" style="background:#34495e; color:white; font-size:13px; padding:10px;">
-        👁️ Afficher mon RIB pour payer
-    </button>
-
-    <div id="zone-rib" class="hidden" style="margin-top:10px;">
-        <p style="font-size:12px; background:#fff; padding:10px; border:1px dashed #ccc; word-break:break-all;">
-            <b>RIB :</b> TN59 12 30100 00133 06217243
-        </p>
-        <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" 
-                style="background:#27ae60; color:white; font-size:12px; width:auto; padding:5px 10px;">
-            📋 Copier le code
+    <div style="margin:20px 0; padding:15px; background:#f9f9f9; border-radius:10px;">
+        <p style="font-weight:bold;">💳 Paiement par Virement</p>
+        
+        <button id="show-rib-btn" onclick="toggleRIB()" style="background:#34495e; color:white; padding:8px; font-size:12px;">
+            👁️ Afficher le RIB pour payer
         </button>
+
+        <div id="rib-details" class="hidden" style="margin-top:10px;">
+            <p style="font-size:11px; background:white; padding:10px; border:1px dashed #ccc;">
+                <b>RIB :</b> TN59 12 30100 00133 06217243
+            </p>
+            <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" 
+                    style="background:#27ae60; color:white; width:auto; padding:5px 10px; font-size:11px;">
+                📋 Copier le RIB
+            </button>
+        </div>
     </div>
 </div>
+
+<div id="analyses-section" class="card hidden">
+    <h3>📁 Mes Documents & Analyses</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="analyses-body"></tbody>
+    </table>
+</div>
+
+    
+     
  
 </div>
 
@@ -317,6 +330,33 @@ function afficherRIB() {
     document.getElementById('zone-rib').classList.remove('hidden');
     document.getElementById('btn-voir-rib').classList.add('hidden');
 }
+
+    // Affiche le RIB quand on clique sur le bouton "œil"
+function toggleRIB() {
+    document.getElementById('rib-details').classList.remove('hidden');
+    document.getElementById('show-rib-btn').classList.add('hidden');
+}
+
+// Modifiez votre fonction de connexion pour afficher aussi les analyses
+function connexionPayante() {
+    const nom = document.getElementById('user_login').value.trim();
+    const code = document.getElementById('license_key').value.trim();
+    const codesValides = ["CLIENT01", "RIM2026", "AYA2026"];
+
+    if (nom && codesValides.includes(code)) {
+        localStorage.setItem('session_patient', nom);
+        
+        // AFFICHE LE CONTENU ET LES ANALYSES
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('analyses-section').classList.remove('hidden'); // On montre les analyses ici
+        
+        lancerApplication(nom);
+    } else {
+        alert("❌ Code invalide.");
+    }
+}
+
 
 </script>
 </body>
