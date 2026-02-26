@@ -109,14 +109,23 @@
     // ⚠️ REMPLACEZ PAR VOTRE LIEN GOOGLE SCRIPT (EXEC)
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
+    function connexionPayante() {
+    const nom = document.getElementById('user_login').value.trim();
+    const code = document.getElementById('license_key').value.trim();
+    
+    // Liste des codes que vous donnez après réception du virement sur votre RIB
+    const codesAchetes = ["CLIENT01", "PAIEMENT_OK", "SANTE_PRO"];
 
-    function connexion() {
-        const u = document.getElementById('user_login').value.trim();
-        if(u) {
-            localStorage.setItem('session_patient', u);
-            lancerApplication(u);
-        }
+    if (nom && codesAchetes.includes(code)) {
+        localStorage.setItem('session_patient', nom);
+        lancerApplication(nom);
+    } else {
+        alert("❌ Accès refusé. Veuillez payer ou entrer un code valide.");
     }
+}
+
+
+    
 
     function lancerApplication(pseudo) {
         patientActuel = pseudo;
