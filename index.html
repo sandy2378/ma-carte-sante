@@ -3,121 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Ma Carte Santé</title>
+    <title>Ma Carte Santé Pro</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        :root {
-            --primary: #e74c3c;
-            --secondary: #2c3e50;
-            --success: #27ae60;
-            --accent: #3498db;
+        :root { 
+            --primary: #e74c3c; --secondary: #2c3e50; 
+            --success: #27ae60; --warning: #f1c40f; --accent: #3498db; 
         }
-
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: #f0f2f5; 
-            margin: 0; 
-            padding: 10px; 
-            color: var(--secondary);
-        }
-
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 10px; }
         .container { max-width: 500px; margin: auto; }
-
-        .card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            margin-bottom: 20px; 
-        }
-
-        .emergency-card { 
-            background: linear-gradient(135deg, var(--primary), #c0392b); 
-            color: white; 
-            padding: 20px; 
-            border-radius: 20px; 
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        h2, h3 { margin-top: 0; }
-
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 8px 0; 
-            border: 1px solid #ddd; 
-            border-radius: 10px; 
-            box-sizing: border-box; 
-            font-size: 16px; 
-        }
-
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 16px;
-            transition: transform 0.2s, opacity 0.2s; 
-        }
-
-        button:active { transform: scale(0.98); }
-
+        
+        /* Design des Cartes */
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); margin-bottom: 15px; border: 1px solid #eee; }
+        .emergency-card { background: linear-gradient(135deg, var(--primary), #c0392b); color: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; text-align: center; }
+        
+        /* Inputs et Boutons */
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; }
         .btn-main { background: var(--secondary); color: white; }
         .btn-green { background: var(--success); color: white; }
         .btn-blue { background: var(--accent); color: white; }
-
-        .hidden { display: none; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
         
-        #qrcode { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 12px; 
-            display: inline-block; 
-            margin: 10px 0;
-        }
+        /* Alertes Santé */
+        #health-status { padding: 10px; border-radius: 10px; margin-bottom: 10px; font-weight: bold; display: none; text-align: center; }
+        .status-danger { background: #ffdada; color: #c0392b; border: 1px solid #c0392b; }
+        .status-ok { background: #d5f5e3; color: #27ae60; border: 1px solid #27ae60; }
 
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .doc-link {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.15);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-        }
+        /* Tableau et Listes */
+        table { width: 100%; border-collapse: collapse; font-size: 12px; background: white; }
+        th, td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #f1f1f1; }
+        .hidden { display: none; }
+        #qrcode { background: white; padding: 10px; border-radius: 10px; display: inline-block; margin: 15px 0; border: 2px solid #fff; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .doc-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; margin: 5px 0; text-decoration: none; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="auth-section" class="card" style="text-align:center;">
-        <h2 style="color:var(--primary);">💎 Accès Premium</h2>
-        <input type="text" id="user_login" placeholder="Votre Nom">
+        <h2 style="color:var(--primary);">💎 Accès Premium Santé</h2>
+        <input type="text" id="user_login" placeholder="Nom du Patient">
         <input type="password" id="license_key" placeholder="Code d'activation">
-        <button onclick="connexionPayante()" class="btn-green">🚀 Activer mon accès</button>
+        <button onclick="connexionPayante()" class="btn-green">🚀 Activer mon Espace</button>
         
-        <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-        
-        <div style="border: 2px dashed var(--success); padding:15px; border-radius:15px;">
-            <h3 style="font-size:16px;">💳 Activation Immédiate</h3>
-            <p style="font-size:14px;">Tarif : 10 DT / 10 €</p>
-            <button onclick="toggleRIB()" style="background:#eee; color:#333; font-size:12px;">👁️ Voir le RIB</button>
-            <div id="zone-rib" class="hidden" style="padding:10px; font-size:11px; word-break:break-all; background:#f9f9f9; border-radius:8px;">
+        <div style="margin-top:20px; border-top: 1px solid #eee; padding-top:20px;">
+            <p style="font-size:14px; color:#666;">Pas encore de code ? Payez via RIB :</p>
+            <button onclick="document.getElementById('rib-box').classList.toggle('hidden')" style="background:#eee; color:#333; font-size:12px;">👁️ Voir le RIB</button>
+            <div id="rib-box" class="hidden" style="font-size:11px; padding:10px; background:#f9f9f9; border-radius:10px; margin:10px 0; word-break:break-all;">
                 <b>RIB :</b> TN59 12 30100 00133 06217243
             </div>
             <button onclick="ouvrirWhatsApp('paiement')" class="btn-green">💬 Envoyer le reçu (WhatsApp)</button>
@@ -125,56 +62,56 @@
     </div>
 
     <div id="main-content" class="hidden">
+        
         <div class="emergency-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin:0;">CARTE SOS 🆘</h2>
-                <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.2); margin:0; padding:5px 10px; font-size:12px; color:white;">Déconnexion</button>
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:bold;">CARTE SOS 🆘</span>
+                <button onclick="deconnexion()" style="width:auto; padding:5px; background:rgba(0,0,0,0.2); color:white; font-size:10px;">Sortir</button>
             </div>
-            <p id="nomAffiche" style="font-size:22px; font-weight:bold; margin:15px 0 5px 0;">Patient : ...</p>
+            <h2 id="nomAffiche">Patient : ...</h2>
+            <div id="qrcode"></div>
+            <button onclick="partagerQR()" class="btn-blue">📲 Partager ma Fiche QR</button>
             
-            <div style="text-align:center;">
-                <div id="qrcode"></div>
-                <button onclick="partagerDossier()" class="btn-blue">📲 Partager ma Fiche QR</button>
-            </div>
-
-            <div style="margin-top:15px;">
-                <h4 style="margin-bottom:10px;">📄 Analyses & Documents :</h4>
-                <div id="analyses-list"></div>
+            <div style="text-align:left; margin-top:15px;">
+                <p style="font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.3);">📄 Mes Documents :</p>
+                <div id="list-docs-sos"></div>
             </div>
         </div>
 
+        <div id="health-status"></div>
+
         <div class="card">
-            <h3>➕ Relevé Médical</h3>
-            <div class="grid-inputs">
-                <input type="text" id="tension" placeholder="Tension (12/8)">
-                <input type="number" id="pouls" placeholder="Pouls (bpm)">
+            <h3>➕ Nouveau Relevé</h3>
+            <div class="grid">
+                <input type="text" id="tension" placeholder="Tension (ex: 12/8)">
+                <input type="number" id="pouls" placeholder="❤ Cœur (bpm)">
             </div>
-            <div class="grid-inputs">
+            <div class="grid">
                 <input type="number" id="spo2" placeholder="Oxygène %">
                 <input type="number" id="sucre" step="0.01" placeholder="Sucre (g/L)">
             </div>
-            <button onclick="ajouterMesure()" class="btn-main">💾 Enregistrer</button>
-            <button onclick="ouvrirWhatsApp('mesures')" style="background:#25D366; color:white;">💬 Partager au Docteur</button>
+            <button onclick="ajouterMesure()" class="btn-main">💾 Enregistrer les données</button>
+            <button onclick="ouvrirWhatsApp('docteur')" style="background:#25D366; color:white;">💬 Envoyer au Docteur</button>
         </div>
 
         <div class="card">
-            <h3>📈 Suivi Glycémie</h3>
-            <canvas id="santeChart" style="max-height:250px;"></canvas>
+            <h3>📈 Évolution Glycémie</h3>
+            <canvas id="santeChart" height="150"></canvas>
         </div>
 
         <div class="card">
-            <h3>📁 Ajouter une Analyse</h3>
-            <input type="text" id="titreDoc" placeholder="Nom du document (ex: Bilan Sang)">
-            <input type="text" id="lienDoc" placeholder="Lien Google Drive / Photo">
-            <button onclick="ajouterDocument()" class="btn-blue">🖇️ Lier le document</button>
+            <h3>📁 Ajouter un Document / Analyse</h3>
+            <input type="text" id="titreDoc" placeholder="Titre (ex: Bilan Avril)">
+            <input type="text" id="lienDoc" placeholder="Lien (Google Drive / Photo)">
+            <button onclick="ajouterDocument()" class="btn-blue">📎 Lier le document</button>
         </div>
 
-        <div class="card" style="overflow-x:auto;">
+        <div class="card" style="padding:10px;">
             <h3>📒 Historique</h3>
             <table>
                 <thead>
                     <tr style="background:#f8f9fa;">
-                        <th>Date</th><th>Tens.</th><th>Oxy.</th><th>Sucre</th>
+                        <th>Date</th><th>Tens.</th><th>❤</th><th>Oxy.</th><th>Sucre</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -186,19 +123,18 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
-    let monGraphique = null;
 
-    // --- LOGIQUE DE CONNEXION ---
+    // 1. GESTION DE LA CONNEXION
     function connexionPayante() {
         const nom = document.getElementById('user_login').value.trim();
         const code = document.getElementById('license_key').value.trim();
         const codesValides = ["CLIENT01", "RIM2026", "AYA2026", "PAIEMENT_OK"];
-
+        
         if (nom && codesValides.includes(code)) {
             localStorage.setItem('session_patient', nom);
             lancerApplication(nom);
         } else {
-            alert("❌ Accès refusé. Vérifiez votre code ou votre paiement.");
+            alert("❌ Accès Refusé. Code incorrect ou impayé.");
         }
     }
 
@@ -206,63 +142,50 @@
         patientActuel = pseudo;
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
-
-        // QR Code
-        const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = "";
-        new QRCode(qrDiv, { text: window.location.href, width: 120, height: 120 });
-
+        document.getElementById('nomAffiche').innerText = pseudo;
+        genererQR();
         chargerDonnees();
     }
 
-    // --- ACTIONS WHATSAPP ---
-    function ouvrirWhatsApp(type) {
-        const numero = "21646248269"; 
-        let texte = "";
-        
-        if(type === 'paiement') {
-            texte = "Bonjour, j'ai effectué le virement pour l'accès Premium Santé.";
-        } else {
-            const t = document.getElementById('tension').value;
-            const s = document.getElementById('sucre').value;
-            texte = `Bonjour Docteur, voici mes dernières mesures (${patientActuel}) :\nTension : ${t}\nGlycémie : ${s} g/L`;
-        }
-        window.open(`https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(texte)}`, '_blank');
+    // 2. GÉNÉRATION DU QR CODE STABLE
+    function genererQR() {
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = "";
+        setTimeout(() => {
+            new QRCode(qrContainer, { text: window.location.href, width: 140, height: 140 });
+        }, 500);
     }
 
-    function partagerDossier() {
-        const msg = "Voici mon carnet de santé numérique : " + window.location.href;
-        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    // --- GESTION DES DONNÉES ---
+    // 3. ENREGISTREMENT ET ANALYSE
     async function ajouterMesure() {
+        const t = document.getElementById('tension').value;
+        const s = parseFloat(document.getElementById('sucre').value);
+        if(!t || !s) return alert("Remplissez au moins la Tension et le Sucre.");
+
         const data = {
             nom: patientActuel,
-            tension: document.getElementById('tension').value,
+            tension: t,
             pouls: document.getElementById('pouls').value,
             spo2: document.getElementById('spo2').value,
-            sucre: document.getElementById('sucre').value
+            sucre: s
         };
-        if(!data.tension || !data.sucre) return alert("Veuillez saisir au moins la Tension et le Sucre.");
-
+        
         await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("✅ Mesures enregistrées !");
+        alert("✅ Données sauvegardées !");
         location.reload();
     }
 
     async function ajouterDocument() {
         const titre = document.getElementById('titreDoc').value;
         const lien = document.getElementById('lienDoc').value;
-        if(!titre || !lien) return alert("Titre et lien requis.");
-
-        const data = { nom: patientActuel, tension: "DOC", spo2: titre, sucre: lien };
+        if(!titre || !lien) return alert("Titre et Lien requis.");
+        const data = { nom: patientActuel, tension: "DOC", spo2: titre, sucre: lien, pouls: "" };
         await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("📁 Document lié !");
+        alert("📁 Document ajouté avec succès !");
         location.reload();
     }
 
+    // 4. CHARGEMENT ET HISTORIQUE
     async function chargerDonnees() {
         try {
             const resp = await fetch(API_URL);
@@ -270,54 +193,67 @@
             const mesInfos = data.filter(d => d.nom === patientActuel);
             
             const tableBody = document.getElementById('table-body');
-            const analysesList = document.getElementById('analyses-list');
+            const docSos = document.getElementById('list-docs-sos');
             tableBody.innerHTML = "";
-            analysesList.innerHTML = "";
+            docSos.innerHTML = "";
 
             mesInfos.reverse().forEach(d => {
                 if(d.tension === "DOC") {
-                    // C'est un document
-                    analysesList.innerHTML += `<a href="${d.sucre}" target="_blank" class="doc-link"><span>📄 ${d.spo2}</span> <span>👁️</span></a>`;
+                    docSos.innerHTML += `<a href="${d.sucre}" target="_blank" class="doc-item"><span>📄 ${d.spo2}</span> <span>➡</span></a>`;
                 } else {
-                    // C'est une mesure
                     let dateC = d.date ? new Date(d.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) : "--";
                     tableBody.innerHTML += `<tr>
                         <td>${dateC}</td>
                         <td>${d.tension}</td>
+                        <td style="color:red; font-weight:bold;">${d.pouls}</td>
                         <td>${d.spo2}%</td>
-                        <td style="font-weight:bold; color:var(--primary);">${d.sucre}</td>
+                        <td style="font-weight:bold;">${d.sucre}</td>
                     </tr>`;
                 }
             });
+            analyserSante(mesInfos[0]); // Analyse la dernière mesure
+            initGraphique(mesInfos);
+        } catch (e) { console.log("Erreur de synchronisation"); }
+    }
 
-            if (mesInfos.length > 0) initGraphique(mesInfos);
-        } catch (e) { console.log("Erreur chargement données"); }
+    function analyserSante(m) {
+        if(!m || m.tension === "DOC") return;
+        const status = document.getElementById('health-status');
+        status.style.display = "block";
+        const sucre = parseFloat(m.sucre);
+        if(sucre > 1.26) {
+            status.innerHTML = "⚠ Alerte : Glycémie Élevée";
+            status.className = "status-danger";
+        } else {
+            status.innerHTML = "✅ Paramètres Santé Stables";
+            status.className = "status-ok";
+        }
     }
 
     function initGraphique(donnees) {
         const ctx = document.getElementById('santeChart').getContext('2d');
         const mesures = donnees.filter(d => d.tension !== "DOC").reverse().slice(-7);
-        
-        if(monGraphique) monGraphique.destroy();
-
-        monGraphique = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'line',
             data: {
                 labels: mesures.map(d => new Date(d.date).getDate() + "/" + (new Date(d.date).getMonth()+1)),
-                datasets: [{
-                    label: 'Sucre (g/L)',
-                    data: mesures.map(d => d.sucre),
-                    borderColor: '#e74c3c',
-                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
+                datasets: [{ label: 'Glycémie (g/L)', data: mesures.map(d => d.sucre), borderColor: '#e74c3c', tension: 0.3, fill: false }]
+            }
         });
     }
 
-    function toggleRIB() { document.getElementById("zone-rib").classList.toggle('hidden'); }
+    // 5. FONCTIONS DE PARTAGE
+    function ouvrirWhatsApp(type) {
+        const num = "21646248269";
+        const msg = type === 'paiement' ? "Bonjour, voici mon reçu de paiement." : `Bonjour, voici mes mesures santé (${patientActuel}).`;
+        window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function partagerQR() {
+        const msg = "🆘 Fiche Médicale d'Urgence : " + window.location.href;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
     function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
 
     window.onload = () => {
