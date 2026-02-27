@@ -2,115 +2,98 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Ma Carte Santé</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-<meta name="theme-color" content="#e74c3c">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
-
-<link rel="manifest" href="manifest.json">
-
+    <meta name="theme-color" content="#e74c3c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+    <link rel="manifest" href="manifest.json">
 
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .emergency-card { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-save { background: #34495e; color: white; }
         .btn-action { color: white; display: inline-block; width: 48%; }
         .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; }
-        #qrcode { background: white; padding: 5px; border-radius: 5px; display: inline-block; }
-        #health-alert { font-weight: bold; text-align: center; display: none; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; color: #333; }
+        .emergency-card td { color: white; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        #qrcode { background: white; padding: 5px; border-radius: 5px; display: inline-block; min-width: 100px; min-height: 100px; }
     </style>
 </head>
 <body>
+
 <div class="container">
-<div id="auth-section" class="card" style="text-align:center;">
-    <h2 style="color:#2c3e50;">💎 Accès Premium Santé</h2>
-    <input type="text" id="user_login" placeholder="Votre Nom">
-    <input type="password" id="license_key" placeholder="Code d'activation">
-    <button onclick="connexionPayante()" class="btn-save" style="background:#27ae60;">🚀 Activer mon accès</button>
-    
+    <div id="auth-section" class="card" style="text-align:center;">
+        <h2 style="color:#2c3e50;">💎 Accès Premium Santé</h2>
+        <input type="text" id="user_login" placeholder="Votre Nom">
+        <input type="password" id="license_key" placeholder="Code d'activation">
+        <button onclick="connexionPayante()" style="background:#27ae60; color:white;">🚀 Activer mon accès</button>
+        
+        <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+        
+        <div style="border: 2px solid #2ecc71; padding:15px; border-radius:15px;">
+            <h3 style="color:#2c3e50;">💳 PAIEMENT SÉCURISÉ</h3>
+            <p style="font-size:14px;">Tarif Accès : 10 DT / 10 €</p>
+            
+            <button id="btn-show-rib" onclick="toggleRIB()" style="background:#34495e; color:white; padding:8px; font-size:12px;">
+                👁️ Voir le RIB pour le virement
+            </button>
 
-   <div class="card" style="text-align:center; border: 2px solid #2ecc71;">
-    <h3 style="color:#2c3e50;">💳 PAIEMENT SÉCURISÉ</h3>
-    <p>Tarif Accès : 10 DT / 10 €</p>
-    
-    <button onclick="toggleRIB()" style="background:#34495e; color:white; padding:8px; font-size:12px; margin-bottom:10px;">
-        👁️ Voir le RIB pour le virement
-    </button>
+            <div id="zone-rib" class="hidden" style="margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:10px;">
+                <p style="font-size:11px; word-break:break-all; color:#333;"><b>RIB :</b> TN59 12 30100 00133 06217243</p>
+                <button onclick="copierRIB()" style="background:#95a5a6; color:white; font-size:10px; width:auto; padding:5px 10px;">📋 Copier le RIB</button>
+            </div>
 
-    <div id="zone-rib" style="display:none; margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:10px;">
-        <p style="font-size:11px;"><b>RIB :</b> TN59 12 30100 00133 06217243</p>
-        <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" style="font-size:10px;">📋 Copier</button>
+            <button onclick="ouvrirWhatsApp()" style="background:#2ecc71; color:white; width:100%; padding:12px; border-radius:10px; font-weight:bold;">
+                💬 ENVOYER LE REÇU (WHATSAPP)
+            </button>
+        </div>
     </div>
-
-    <button onclick="ouvrirWhatsApp()" style="background:#2ecc71; color:white; width:100%; padding:12px; border-radius:10px; font-weight:bold;">
-        💬 ENVOYER LE REÇU (WHATSAPP)
-    </button>
-</div>
- 
-    
-
-    </div>
-</div>
-
-
-
-    
-     
- 
-</div>
-
-
-
-
-
 
     <div id="main-content" class="hidden">
         <div class="emergency-card">
-            <h2>CARTE D'URGENCE 🆘</h2>
-            <div id="nomAffiche" style="font-size: 20px; font-weight: bold; margin-bottom:10px;">Patient : ...</div>
-            <input type="text" id="allergies" placeholder="Pathologie / Allergies">
-            <input type="text" id="telDocteur" placeholder="📞 Tél Docteur">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px;">
-                <div id="qrcode"></div>
-                <button onclick="partagerQR()" style="background:#3498db; color:white; margin-top:10px;">📲 Partager ma Fiche QR</button>
-
-                <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.3); color:white; padding:5px 10px;">🏃 Déconnexion</button>
+            <div style="display:flex; justify-content:space-between;">
+                <h2>CARTE D'URGENCE 🆘</h2>
+                <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.3); color:white; padding:5px 10px; font-size:10px;">🏃 Quitter</button>
             </div>
-            <div class="card">
-    <h3>📁 Mes Documents & Analyses</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Document</th>
-                <th>Lien / Action</th>
-            </tr>
-        </thead>
-        <tbody id="analyses-body"></tbody>
-    </table>
-</div>
+            
+            <div id="nomAffiche" style="font-size: 20px; font-weight: bold; margin-bottom:10px;">Patient : ...</div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px; gap:15px;">
+                <div id="qrcode"></div>
+                <div style="flex:1;">
+                    <button onclick="partagerQR()" style="background:#3498db; color:white; font-size:12px;">📲 Partager ma Fiche</button>
+                    <p style="font-size:10px; margin-top:5px;">Scannez pour voir mon dossier médical complet.</p>
+                </div>
+            </div>
 
+            <div style="margin-top:20px; background:rgba(255,255,255,0.1); padding:10px; border-radius:10px;">
+                <h4 style="margin:0 0 10px 0;">📁 Mes Analyses</h4>
+                <table style="color:white;">
+                    <thead>
+                        <tr><th>Document</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="analyses-body"></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="card">
             <h3>➕ Nouvelle Mesure</h3>
-            <div id="health-alert"></div>
             <div style="display:flex; gap:10px;">
-                <input type="text" id="tension" placeholder="Tension (ex: 12/8)">
+                <input type="text" id="tension" placeholder="Tension (12/8)">
                 <input type="number" id="spo2" placeholder="Oxygène %">
             </div>
             <div style="display:flex; gap:10px;">
@@ -118,10 +101,6 @@
                 <input type="number" step="0.01" id="sucre" placeholder="Sucre (g/L)">
             </div>
             <button class="btn-save" onclick="ajouterMesure()">Enregistrer</button>
-            <div style="display:flex; justify-content: space-between;">
-                <button onclick="envoyerWhatsApp()" class="btn-action" style="background:#25D366;">💬 WhatsApp</button>
-                <button onclick="envoyerEmail()" class="btn-action" style="background:#ea4335;">📧 Email</button>
-            </div>
         </div>
        
         <div class="card">
@@ -130,23 +109,17 @@
         </div>
 
         <div class="card">
-            <h3>📁 Ajouter une Analyse</h3>
-            <input type="text" id="titreAnalyse" placeholder="Titre de l'analyse">
-            <input type="text" id="lienAnalyse" placeholder="Lien du document">
-            <button class="btn-save" style="background:#3498db;" onclick="ajouterAnalyse()">Sauvegarder l'analyse</button>
+            <h3>📁 Ajouter un Document</h3>
+            <input type="text" id="titreAnalyse" placeholder="Nom de l'analyse (ex: Sang)">
+            <input type="text" id="lienAnalyse" placeholder="Lien du document (Google Drive)">
+            <button class="btn-save" style="background:#3498db;" onclick="ajouterAnalyse()">Sauvegarder</button>
         </div>
 
         <div class="card">
-            <h3>📒 Historique</h3>
+            <h3>📒 Historique des mesures</h3>
             <table>
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Tens.</th>
-                        <th>Oxy.</th>
-                        <th>Cœur</th>
-                        <th>Sucre</th>
-                    </tr>
+                    <tr><th>Date</th><th>Tens.</th><th>Oxy.</th><th>Sucre</th></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -154,97 +127,64 @@
     </div>
 </div>
 
-
-    
-
 <script>
-    // ⚠️ REMPLACEZ PAR VOTRE LIEN GOOGLE SCRIPT (EXEC)
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
-    
 
-function connexionPayante() {
-    const nom = document.getElementById('user_login').value.trim();
-    const code = document.getElementById('license_key').value.trim();
-    
-    // Ajoutez ici les codes que vous donnez à vos clients payants
-    const codesAchetes = ["CLIENT01", "PAIEMENT_OK", "RIM2026", "AYA2026"];
-
-    if (nom && codesAchetes.includes(code)) {
-        localStorage.setItem('session_patient', nom);
-        // On appelle la fonction pour afficher le reste du site
-        lancerApplication(nom); 
-    } else {
-        alert("❌ Code incorrect ou accès non payé.");
-    }
-}
-
-
-
-function montrerRIB() {
-    document.getElementById('zone-rib').style.display = 'block';
-    document.getElementById('btn-rib').style.display = 'none';
-}
-
-
-
-    // Fonction pour le bouton WhatsApp (SANS ESPACES)
-function envoyerPreuveWhatsApp() {
-    // Remplacez les X par votre numéro sans le + (ex: 21646248269)
-    const monNumero = "21646248269"; 
-    const message = "Bonjour, j'ai effectué le virement pour l'Accès Premium. Voici mon reçu.";
-    const url = "https://api.whatsapp.com/send?phone=" + monNumero + "&text=" + encodeURIComponent(message);
-    window.open(url, '_blank');
-}
-
-
-
-
+    // GESTION PAIEMENT ET CONNEXION
     function toggleRIB() {
-    const x = document.getElementById("zone-rib");
-    x.style.display = (x.style.display === "none") ? "block" : "none";
-}
+        const x = document.getElementById("zone-rib");
+        x.classList.toggle('hidden');
+    }
 
+    function copierRIB() {
+        navigator.clipboard.writeText('TN5912301000013306217243');
+        alert('✅ RIB copié dans le presse-papier !');
+    }
 
+    function ouvrirWhatsApp() {
+        const numero = "21646248269"; 
+        const texte = encodeURIComponent("Bonjour, j'ai fait le virement. Voici mon reçu pour activer mon accès Ma Carte Santé.");
+        window.open("https://api.whatsapp.com/send?phone=" + numero + "&text=" + texte, '_blank');
+    }
 
-function ouvrirWhatsApp() {
-    // SANS ESPACES, SANS +, avec 216 au début
-    const numero = "21646248269"; 
-    const texte = encodeURIComponent("Bonjour, j'ai fait le virement. Voici mon reçu pour activer mon accès.");
-    window.open("https://api.whatsapp.com/send?phone=" + numero + "&text=" + texte, '_blank');
-}
+    function connexionPayante() {
+        const nom = document.getElementById('user_login').value.trim();
+        const code = document.getElementById('license_key').value.trim();
+        const codesValides = ["CLIENT01", "RIM2026", "AYA2026", "PAIEMENT_OK"];
 
+        if (nom && codesValides.includes(code)) {
+            localStorage.setItem('session_patient', nom);
+            lancerApplication(nom);
+        } else {
+            alert("❌ Nom ou Code incorrect. Veuillez vérifier votre paiement.");
+        }
+    }
 
+    // GESTION APPLICATION
     function lancerApplication(pseudo) {
-    patientActuel = pseudo;
-    // On cache la partie connexion et on montre le contenu
-    document.getElementById('auth-section').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-    document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
+        patientActuel = pseudo;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
 
-    // On vide la zone avant de générer le QR pour éviter les doublons
-    document.getElementById("qrcode").innerHTML = "";
-    
-    // Génération du QR Code
-    setTimeout(() => {
-        new QRCode(document.getElementById("qrcode"), {
-            text: window.location.href,
-            width: 100,
-            height: 100,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-    }, 500);
+        // Générer le QR Code
+        document.getElementById("qrcode").innerHTML = "";
+        setTimeout(() => {
+            new QRCode(document.getElementById("qrcode"), {
+                text: window.location.href,
+                width: 100,
+                height: 100
+            });
+        }, 300);
 
-    chargerHistorique();
-}
-
+        chargerHistorique();
+    }
 
     async function ajouterMesure() {
         const t = document.getElementById('tension').value;
         const s = document.getElementById('sucre').value;
-        if(!t || !s) return alert("Remplissez Tension et Sucre !");
+        if(!t || !s) return alert("Veuillez remplir au moins la Tension et le Sucre.");
 
         const data = {
             nom: patientActuel,
@@ -256,9 +196,22 @@ function ouvrirWhatsApp() {
 
         try {
             await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            alert("✅ Enregistré !");
+            alert("✅ Mesure enregistrée !");
             location.reload(); 
-        } catch (e) { alert("Erreur d'envoi"); }
+        } catch (e) { alert("Erreur de connexion."); }
+    }
+
+    async function ajouterAnalyse() {
+        const titre = document.getElementById('titreAnalyse').value;
+        const lien = document.getElementById('lienAnalyse').value;
+        if(!titre || !lien) return alert("Remplissez le titre et le lien.");
+        
+        const data = { nom: patientActuel, tension: "DOC", spo2: titre, pouls: "", sucre: lien };
+        try {
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            alert("📁 Document ajouté !");
+            location.reload();
+        } catch (e) { alert("Erreur"); }
     }
 
     async function chargerHistorique() {
@@ -266,23 +219,29 @@ function ouvrirWhatsApp() {
             const resp = await fetch(API_URL);
             const data = await resp.json();
             const mesDonnees = data.filter(d => d.nom === patientActuel);
-            const tbody = document.getElementById('table-body');
             
-            tbody.innerHTML = mesDonnees.reverse().map(d => {
-                // Correction de la date pour éviter le décalage
-                let dateC = "--";
-                if(d.date) {
-                    const dt = new Date(d.date);
-                    dateC = dt.getDate().toString().padStart(2,'0') + '/' + (dt.getMonth()+1).toString().padStart(2,'0');
+            const tbody = document.getElementById('table-body');
+            const abody = document.getElementById('analyses-body');
+            
+            tbody.innerHTML = "";
+            abody.innerHTML = "";
+
+            mesDonnees.reverse().forEach(d => {
+                if(d.tension !== "DOC") {
+                    let dateC = d.date ? new Date(d.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) : "--";
+                    tbody.innerHTML += `<tr>
+                        <td>${dateC}</td>
+                        <td>${d.tension || '-'}</td>
+                        <td>${d.spo2 || '-'}%</td>
+                        <td style="font-weight:bold;">${d.sucre || '-'}</td>
+                    </tr>`;
+                } else {
+                    abody.innerHTML += `<tr>
+                        <td>${d.spo2}</td> 
+                        <td><a href="${d.sucre}" target="_blank" style="color:#fff; font-weight:bold; text-decoration:underline;">📄 Voir</a></td>
+                    </tr>`;
                 }
-                return `<tr>
-                    <td>${dateC}</td>
-                    <td>${d.tension || '-'}</td>
-                    <td>${d.spo2 || '-'}</td>
-                    <td>${d.pouls || '-'}</td>
-                    <td style="font-weight:bold;">${d.sucre || '-'}</td>
-                </tr>`;
-            }).join('');
+            });
 
             if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
         } catch (e) { console.log("Chargement..."); }
@@ -290,133 +249,38 @@ function ouvrirWhatsApp() {
 
     function dessinerEvolution(donnees) {
         const ctx = document.getElementById('santeChart').getContext('2d');
-        const dernieres = donnees.slice(-7);
+        const dernieres = donnees.filter(d => d.tension !== "DOC").slice(-7);
         if (window.monGraphique) { window.monGraphique.destroy(); }
         window.monGraphique = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dernieres.map(d => {
-                    const dt = new Date(d.date);
-                    return dt.getDate() + '/' + (dt.getMonth()+1);
-                }),
+                labels: dernieres.map(d => new Date(d.date).getDate() + '/' + (new Date(d.date).getMonth()+1)),
                 datasets: [{
                     label: 'Glycémie (g/L)',
                     data: dernieres.map(d => parseFloat(d.sucre) || 0),
                     borderColor: '#3498db',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)'
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    fill: true
                 }]
             }
         });
     }
 
-    function envoyerWhatsApp() {
-        const t = document.getElementById('tension').value;
-        const s = document.getElementById('sucre').value;
-        if(!t || !s) return alert("Remplissez d'abord les cases !");
-        const msg = `Mesures de ${patientActuel} :%0A- Tension: ${t}%0A- Sucre: ${s} g/L`;
+    function partagerQR() {
+        const msg = encodeURIComponent("Voici mon dossier de santé sécurisé : " + window.location.href);
         window.open(`https://wa.me/?text=${msg}`, '_blank');
     }
 
-    function envoyerEmail() {
-        const t = document.getElementById('tension').value;
-        const s = document.getElementById('sucre').value;
-        if(!t || !s) return alert("Remplissez d'abord les cases !");
-        const corps = `Mesures de ${patientActuel} :\nTension: ${t}\nSucre: ${s} g/L`;
-        window.location.href = `mailto:?subject=Sante&body=${encodeURIComponent(corps)}`;
+    function deconnexion() {
+        localStorage.removeItem('session_patient');
+        location.reload();
     }
 
-    async function ajouterAnalyse() {
-        const titre = document.getElementById('titreAnalyse').value;
-        const lien = document.getElementById('lienAnalyse').value;
-        if(!titre || !lien) return alert("Remplissez titre et lien.");
-        const data = { nom: patientActuel, tension: "DOC", spo2: titre, pouls: "", sucre: lien };
-        try {
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            alert("📁 Analyse sauvegardée !");
-            location.reload();
-        } catch (e) { alert("Erreur"); }
-    }
-// Fonction pour partager
-function partagerQR() {
-    const msg = "Voici mon carnet de santé : " + window.location.href;
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// Fonction de chargement mise à jour
-async function chargerHistorique() {
-    try {
-        const resp = await fetch(API_URL);
-        const data = await resp.json();
-        const mesDonnees = data.filter(d => d.nom === patientActuel);
-        
-        const tbody = document.getElementById('table-body');
-        const abody = document.getElementById('analyses-body'); // Cible le nouveau tableau
-        
-        tbody.innerHTML = "";
-        abody.innerHTML = "";
-
-        mesDonnees.reverse().forEach(d => {
-            // Si c'est une mesure classique (Tension, Sucre...)
-            if(d.tension !== "DOC") {
-                let dateC = d.date ? new Date(d.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) : "--";
-                tbody.innerHTML += `<tr>
-                    <td>${dateC}</td>
-                    <td>${d.tension || '-'}</td>
-                    <td>${d.spo2 || '-'}</td>
-                    <td>${d.pouls || '-'}</td>
-                    <td style="font-weight:bold;">${d.sucre || '-'}</td>
-                </tr>`;
-            } 
-            // Si c'est un document (sauvegardé avec le bouton bleu)
-            else {
-                abody.innerHTML += `<tr>
-                    <td>${d.spo2}</td> 
-                    <td><a href="${d.sucre}" target="_blank" style="color:#3498db; font-weight:bold;">📄 Ouvrir</a></td>
-                </tr>`;
-            }
-        });
-
-        if (mesDonnees.length > 0) dessinerEvolution(mesDonnees);
-    } catch (e) { console.log("Erreur de chargement"); }
-}
-
-    
-    function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
-    window.onload = () => { if(localStorage.getItem('session_patient')) lancerApplication(localStorage.getItem('session_patient')); };
-function afficherRIB() {
-    document.getElementById('zone-rib').classList.remove('hidden');
-    document.getElementById('btn-voir-rib').classList.add('hidden');
-}
-
-    // Affiche le RIB quand on clique sur le bouton "œil"
-function toggleRIB() {
-    document.getElementById('rib-details').classList.remove('hidden');
-    document.getElementById('show-rib-btn').classList.add('hidden');
-}
-
-// Modifiez votre fonction de connexion pour afficher aussi les analyses
-function connexionPayante() {
-    const nom = document.getElementById('user_login').value.trim();
-    const code = document.getElementById('license_key').value.trim();
-    const codesValides = ["CLIENT01", "RIM2026", "AYA2026"];
-
-    if (nom && codesValides.includes(code)) {
-        localStorage.setItem('session_patient', nom);
-        
-        // AFFICHE LE CONTENU ET LES ANALYSES
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('analyses-section').classList.remove('hidden'); // On montre les analyses ici
-        
-        lancerApplication(nom);
-    } else {
-        alert("❌ Code invalide.");
-    }
-}
-
-
+    window.onload = () => {
+        const session = localStorage.getItem('session_patient');
+        if(session) lancerApplication(session);
+    };
 </script>
+
 </body>
 </html>
