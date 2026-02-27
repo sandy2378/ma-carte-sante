@@ -169,17 +169,27 @@
         } else { alert("❌ Identifiants invalides."); }
     }
 
-    function lancerApp(nom) {
-        patient = nom;
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('nomAffiche').innerText = nom;
-        
-        // QR Code avec sécurité de chargement
-        setTimeout(initQR, 600);
-        chargerHistorique();
-    }
+    
 
+function lancerApp(nom) {
+    patient = nom;
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    document.getElementById('nomAffiche').innerText = nom;
+    
+    // On attend un court instant pour que l'interface soit prête
+    setTimeout(() => {
+        const qrDiv = document.getElementById("qrcode");
+        qrDiv.innerHTML = ""; // On nettoie
+        new QRCode(qrDiv, {
+            text: window.location.href, // Le QR code contient le lien de la page
+            width: 150,
+            height: 150
+        });
+    }, 500);
+}
+
+    
     function initQR() {
         const qrDiv = document.getElementById("qrcode");
         qrDiv.innerHTML = "";
@@ -299,10 +309,27 @@ function ouvrirWhatsApp(type) {
 }
 
 
+    
+
     function partagerFiche() {
-        const url = window.location.href;
-        window.open(`https://wa.me/?text=${encodeURIComponent("🆘 Fiche Santé Urgence : " + url)}`, '_blank');
-    }
+    // On demande le numéro du destinataire (comme vous l'avez fait pour les mesures)
+    let numDestinataire = prompt("Entrez le numéro pour partager le QR Code (ex: 21646248269) :", "21646248269");
+    
+    if (!numDestinataire) return;
+
+    // Au lieu d'envoyer l'image (qui crée l'erreur 'content://media'), 
+    // on envoie le lien direct vers votre carnet de santé.
+    // Quand le destinataire clique, il voit votre fiche et votre QR Code.
+    const urlDossier = window.location.href;
+    const nomPatient = document.getElementById('nomAffiche').innerText || "Aya";
+    
+    const message = `🆘 *URGENCE - FICHE MÉDICALE*\n\nVoici l'accès au dossier de santé de *${nomPatient}*.\nCliquez sur le lien pour voir les mesures et le QR Code :\n${urlDossier}`;
+
+    const urlWA = "https://api.whatsapp.com/send?phone=" + numDestinataire + "&text=" + encodeURIComponent(message);
+    
+    // Redirection directe vers WhatsApp
+    window.location.href = urlWA;
+}
 
     function deconnexion() { localStorage.removeItem('patient_nom'); location.reload(); }
 
