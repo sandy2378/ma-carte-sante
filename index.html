@@ -216,21 +216,41 @@ function envoyerPreuveWhatsApp() {
     x.style.display = (x.style.display === "none") ? "block" : "none";
 }
 
+
+
 function ouvrirWhatsApp() {
-    // IMPORTANT : Mettez votre numéro sans le + et sans espaces (ex: 21699000000)
-    const numero = "216XXXXXXXX"; 
+    // SANS ESPACES, SANS +, avec 216 au début
+    const numero = "21646248269"; 
     const texte = encodeURIComponent("Bonjour, j'ai fait le virement. Voici mon reçu pour activer mon accès.");
-    window.location.href = "https://api.whatsapp.com/send?phone=" + numero + "&text=" + texte;
+    window.open("https://api.whatsapp.com/send?phone=" + numero + "&text=" + texte, '_blank');
 }
 
+
     function lancerApplication(pseudo) {
-        patientActuel = pseudo;
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
-        new QRCode(document.getElementById("qrcode"), { text: window.location.href, width: 70, height: 70 });
-        chargerHistorique();
-    }
+    patientActuel = pseudo;
+    // On cache la partie connexion et on montre le contenu
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
+
+    // On vide la zone avant de générer le QR pour éviter les doublons
+    document.getElementById("qrcode").innerHTML = "";
+    
+    // Génération du QR Code
+    setTimeout(() => {
+        new QRCode(document.getElementById("qrcode"), {
+            text: window.location.href,
+            width: 100,
+            height: 100,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    }, 500);
+
+    chargerHistorique();
+}
+
 
     async function ajouterMesure() {
         const t = document.getElementById('tension').value;
