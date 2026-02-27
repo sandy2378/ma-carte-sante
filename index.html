@@ -6,9 +6,17 @@
     <title>Ma Carte Santé</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+    
 <meta name="theme-color" content="#e74c3c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+
+
 
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 15px; }
@@ -184,12 +192,7 @@ function connexionPayante() {
         alert("❌ Code incorrect ou accès non payé.");
     }
 }
-    function envoyerPreuveWhatsApp() {
-    const numero = "216XXXXXXXX"; // REMPLACEZ PAR VOTRE NUMÉRO (ex: 216 pour la Tunisie + votre numéro)
-    const message = "Bonjour, je viens d'effectuer le virement pour mon Accès Premium Santé. Voici ma preuve de paiement.";
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
-}
+
 
 
 function montrerRIB() {
@@ -197,17 +200,23 @@ function montrerRIB() {
     document.getElementById('btn-rib').style.display = 'none';
 }
 
+
+
+    // Fonction pour le bouton WhatsApp (SANS ESPACES)
 function envoyerPreuveWhatsApp() {
-    // Écrivez votre numéro SANS ESPACES et SANS +
-    // Exemple pour la Tunisie : 21646248269
+    // Remplacez les X par votre numéro sans le + (ex: 21646248269)
     const monNumero = "21646248269"; 
-    const texte = "Bonjour, je viens d'effectuer le virement pour mon Accès Premium. Voici mon reçu.";
-    
-    const urlWhatsApp = "https://wa.me/" + monNumero + "?text=" + encodeURIComponent(texte);
-    window.open(urlWhatsApp, '_blank');
+    const message = "Bonjour, j'ai effectué le virement pour l'Accès Premium. Voici mon reçu.";
+    const url = "https://api.whatsapp.com/send?phone=" + monNumero + "&text=" + encodeURIComponent(message);
+    window.open(url, '_blank');
 }
 
-    
+// Fonction pour cacher/montrer le RIB
+function toggleRIB() {
+    const zone = document.getElementById('zone-rib');
+    zone.style.display = (zone.style.display === 'none') ? 'block' : 'none';
+}
+
     function lancerApplication(pseudo) {
         patientActuel = pseudo;
         document.getElementById('auth-section').classList.add('hidden');
