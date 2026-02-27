@@ -33,23 +33,19 @@
     <input type="text" id="user_login" placeholder="Votre Nom">
     <input type="password" id="license_key" placeholder="Code d'activation">
     <button onclick="connexionPayante()" class="btn-save" style="background:#27ae60;">🚀 Activer mon accès</button>
+    <div class="card" style="text-align:center; border: 2px solid #27ae60;">
+    <h3 style="color:#2c3e50;">💳 PAIEMENT SÉCURISÉ</h3>
+    <p style="font-size:14px; font-weight:bold;">Tarif Accès Premium : 10 DT / 10 €</p>
     
-    <div style="margin:20px 0; padding:15px; background:#f9f9f9; border-radius:10px;">
-        <p style="font-weight:bold;">💳 Paiement par Virement</p>
-        
-        <button id="show-rib-btn" onclick="toggleRIB()" style="background:#34495e; color:white; padding:8px; font-size:12px;">
-            👁️ Afficher le RIB pour payer
-        </button>
+    <p style="font-size:12px; background:#f4f4f4; padding:10px; border-radius:5px; word-break:break-all;">
+        <b>RIB :</b> TN59 12 30100 00133 06217243
+    </p>
 
-        <div id="rib-details" class="hidden" style="margin-top:10px;">
-            <p style="font-size:11px; background:white; padding:10px; border:1px dashed #ccc;">
-                <b>RIB :</b> TN59 12 30100 00133 06217243
-            </p>
-            <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" 
-                    style="background:#27ae60; color:white; width:auto; padding:5px 10px; font-size:11px;">
-                📋 Copier le RIB
-            </button>
-        </div>
+    <button onclick="envoyerPreuveWhatsApp()" style="background:#2ecc71; color:white; font-weight:bold; padding:12px; margin-top:10px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; border-radius:10px;">
+        💬 ENVOYER LE REÇU (WHATSAPP)
+    </button>
+</div>
+
     </div>
 </div>
 
@@ -175,7 +171,13 @@ function connexionPayante() {
         alert("❌ Code incorrect ou accès non payé.");
     }
 }
-    
+    function envoyerPreuveWhatsApp() {
+    const numero = "216XXXXXXXX"; // REMPLACEZ PAR VOTRE NUMÉRO (ex: 216 pour la Tunisie + votre numéro)
+    const message = "Bonjour, je viens d'effectuer le virement pour mon Accès Premium Santé. Voici ma preuve de paiement.";
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+}
+
 
     function lancerApplication(pseudo) {
         patientActuel = pseudo;
