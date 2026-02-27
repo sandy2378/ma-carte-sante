@@ -8,118 +8,174 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <meta name="theme-color" content="#e74c3c">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
-    <link rel="manifest" href="manifest.json">
-
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 15px; }
+        :root {
+            --primary: #e74c3c;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --accent: #3498db;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            padding: 10px; 
+            color: var(--secondary);
+        }
+
         .container { max-width: 500px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .emergency-card { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-save { background: #34495e; color: white; }
-        .btn-action { color: white; display: inline-block; width: 48%; }
+
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            margin-bottom: 20px; 
+        }
+
+        .emergency-card { 
+            background: linear-gradient(135deg, var(--primary), #c0392b); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 20px; 
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        h2, h3 { margin-top: 0; }
+
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 8px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 10px 0; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px;
+            transition: transform 0.2s, opacity 0.2s; 
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-main { background: var(--secondary); color: white; }
+        .btn-green { background: var(--success); color: white; }
+        .btn-blue { background: var(--accent); color: white; }
+
         .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
-        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; color: #333; }
-        .emergency-card td { color: white; border-bottom: 1px solid rgba(255,255,255,0.2); }
-        #qrcode { background: white; padding: 5px; border-radius: 5px; display: inline-block; min-width: 100px; min-height: 100px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
+        
+        #qrcode { 
+            background: white; 
+            padding: 10px; 
+            border-radius: 12px; 
+            display: inline-block; 
+            margin: 10px 0;
+        }
+
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .doc-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="auth-section" class="card" style="text-align:center;">
-        <h2 style="color:#2c3e50;">💎 Accès Premium Santé</h2>
+        <h2 style="color:var(--primary);">💎 Accès Premium</h2>
         <input type="text" id="user_login" placeholder="Votre Nom">
         <input type="password" id="license_key" placeholder="Code d'activation">
-        <button onclick="connexionPayante()" style="background:#27ae60; color:white;">🚀 Activer mon accès</button>
+        <button onclick="connexionPayante()" class="btn-green">🚀 Activer mon accès</button>
         
         <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
         
-        <div style="border: 2px solid #2ecc71; padding:15px; border-radius:15px;">
-            <h3 style="color:#2c3e50;">💳 PAIEMENT SÉCURISÉ</h3>
-            <p style="font-size:14px;">Tarif Accès : 10 DT / 10 €</p>
-            
-            <button id="btn-show-rib" onclick="toggleRIB()" style="background:#34495e; color:white; padding:8px; font-size:12px;">
-                👁️ Voir le RIB pour le virement
-            </button>
-
-            <div id="zone-rib" class="hidden" style="margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:10px;">
-                <p style="font-size:11px; word-break:break-all; color:#333;"><b>RIB :</b> TN59 12 30100 00133 06217243</p>
-                <button onclick="copierRIB()" style="background:#95a5a6; color:white; font-size:10px; width:auto; padding:5px 10px;">📋 Copier le RIB</button>
+        <div style="border: 2px dashed var(--success); padding:15px; border-radius:15px;">
+            <h3 style="font-size:16px;">💳 Activation Immédiate</h3>
+            <p style="font-size:14px;">Tarif : 10 DT / 10 €</p>
+            <button onclick="toggleRIB()" style="background:#eee; color:#333; font-size:12px;">👁️ Voir le RIB</button>
+            <div id="zone-rib" class="hidden" style="padding:10px; font-size:11px; word-break:break-all; background:#f9f9f9; border-radius:8px;">
+                <b>RIB :</b> TN59 12 30100 00133 06217243
             </div>
-
-            <button onclick="ouvrirWhatsApp()" style="background:#2ecc71; color:white; width:100%; padding:12px; border-radius:10px; font-weight:bold;">
-                💬 ENVOYER LE REÇU (WHATSAPP)
-            </button>
+            <button onclick="ouvrirWhatsApp('paiement')" class="btn-green">💬 Envoyer le reçu (WhatsApp)</button>
         </div>
     </div>
 
     <div id="main-content" class="hidden">
         <div class="emergency-card">
-            <div style="display:flex; justify-content:space-between;">
-                <h2>CARTE D'URGENCE 🆘</h2>
-                <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.3); color:white; padding:5px 10px; font-size:10px;">🏃 Quitter</button>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0;">CARTE SOS 🆘</h2>
+                <button onclick="deconnexion()" style="width:auto; background:rgba(0,0,0,0.2); margin:0; padding:5px 10px; font-size:12px; color:white;">Déconnexion</button>
             </div>
+            <p id="nomAffiche" style="font-size:22px; font-weight:bold; margin:15px 0 5px 0;">Patient : ...</p>
             
-            <div id="nomAffiche" style="font-size: 20px; font-weight: bold; margin-bottom:10px;">Patient : ...</div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px; gap:15px;">
+            <div style="text-align:center;">
                 <div id="qrcode"></div>
-                <div style="flex:1;">
-                    <button onclick="partagerQR()" style="background:#3498db; color:white; font-size:12px;">📲 Partager ma Fiche</button>
-                    <p style="font-size:10px; margin-top:5px;">Scannez pour voir mon dossier médical complet.</p>
-                </div>
+                <button onclick="partagerDossier()" class="btn-blue">📲 Partager ma Fiche QR</button>
             </div>
 
-            <div style="margin-top:20px; background:rgba(255,255,255,0.1); padding:10px; border-radius:10px;">
-                <h4 style="margin:0 0 10px 0;">📁 Mes Analyses</h4>
-                <table style="color:white;">
-                    <thead>
-                        <tr><th>Document</th><th>Action</th></tr>
-                    </thead>
-                    <tbody id="analyses-body"></tbody>
-                </table>
+            <div style="margin-top:15px;">
+                <h4 style="margin-bottom:10px;">📄 Analyses & Documents :</h4>
+                <div id="analyses-list"></div>
             </div>
         </div>
 
         <div class="card">
-            <h3>➕ Nouvelle Mesure</h3>
-            <div style="display:flex; gap:10px;">
+            <h3>➕ Relevé Médical</h3>
+            <div class="grid-inputs">
                 <input type="text" id="tension" placeholder="Tension (12/8)">
+                <input type="number" id="pouls" placeholder="Pouls (bpm)">
+            </div>
+            <div class="grid-inputs">
                 <input type="number" id="spo2" placeholder="Oxygène %">
+                <input type="number" id="sucre" step="0.01" placeholder="Sucre (g/L)">
             </div>
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="pouls" placeholder="Cœur">
-                <input type="number" step="0.01" id="sucre" placeholder="Sucre (g/L)">
-            </div>
-            <button class="btn-save" onclick="ajouterMesure()">Enregistrer</button>
-        </div>
-       
-        <div class="card">
-            <h3>📈 Évolution Glycémie</h3>
-            <canvas id="santeChart"></canvas>
+            <button onclick="ajouterMesure()" class="btn-main">💾 Enregistrer</button>
+            <button onclick="ouvrirWhatsApp('mesures')" style="background:#25D366; color:white;">💬 Partager au Docteur</button>
         </div>
 
         <div class="card">
-            <h3>📁 Ajouter un Document</h3>
-            <input type="text" id="titreAnalyse" placeholder="Nom de l'analyse (ex: Sang)">
-            <input type="text" id="lienAnalyse" placeholder="Lien du document (Google Drive)">
-            <button class="btn-save" style="background:#3498db;" onclick="ajouterAnalyse()">Sauvegarder</button>
+            <h3>📈 Suivi Glycémie</h3>
+            <canvas id="santeChart" style="max-height:250px;"></canvas>
         </div>
 
         <div class="card">
-            <h3>📒 Historique des mesures</h3>
+            <h3>📁 Ajouter une Analyse</h3>
+            <input type="text" id="titreDoc" placeholder="Nom du document (ex: Bilan Sang)">
+            <input type="text" id="lienDoc" placeholder="Lien Google Drive / Photo">
+            <button onclick="ajouterDocument()" class="btn-blue">🖇️ Lier le document</button>
+        </div>
+
+        <div class="card" style="overflow-x:auto;">
+            <h3>📒 Historique</h3>
             <table>
                 <thead>
-                    <tr><th>Date</th><th>Tens.</th><th>Oxy.</th><th>Sucre</th></tr>
+                    <tr style="background:#f8f9fa;">
+                        <th>Date</th><th>Tens.</th><th>Oxy.</th><th>Sucre</th>
+                    </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -127,35 +183,12 @@
     </div>
 </div>
 
-    <script>
+<script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patientActuel = "";
+    let monGraphique = null;
 
-    // 1. CORRECTION : Affichage stable du QR Code
-    function genererMonQR() {
-        const qrContainer = document.getElementById("qrcode");
-        qrContainer.innerHTML = ""; // Vide le conteneur pour éviter les doublons
-        
-        // On génère le QR code qui pointe vers l'URL actuelle du site
-        new QRCode(qrContainer, {
-            text: window.location.href, 
-            width: 128,
-            height: 128,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-    }
-
-    // 2. CORRECTION : Partage du LIEN (plus fiable que le fichier)
-    function partagerQR() {
-        // Au lieu d'envoyer l'image, on envoie le lien du site
-        // C'est ce qui permet aux secours de scanner ou de cliquer
-        const lienSante = window.location.href;
-        const message = encodeURIComponent("Voici mon carnet de santé numérique : " + lienSante);
-        window.open(`https://wa.me/?text=${message}`, '_blank');
-    }
-
+    // --- LOGIQUE DE CONNEXION ---
     function connexionPayante() {
         const nom = document.getElementById('user_login').value.trim();
         const code = document.getElementById('license_key').value.trim();
@@ -165,7 +198,7 @@
             localStorage.setItem('session_patient', nom);
             lancerApplication(nom);
         } else {
-            alert("❌ Code incorrect.");
+            alert("❌ Accès refusé. Vérifiez votre code ou votre paiement.");
         }
     }
 
@@ -175,34 +208,122 @@
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('nomAffiche').innerText = "Patient : " + pseudo;
 
-        genererMonQR(); // Appelle la nouvelle fonction de génération
-        chargerHistorique();
+        // QR Code
+        const qrDiv = document.getElementById("qrcode");
+        qrDiv.innerHTML = "";
+        new QRCode(qrDiv, { text: window.location.href, width: 120, height: 120 });
+
+        chargerDonnees();
     }
 
-    // ... (Garde tes fonctions ajouterMesure, ajouterAnalyse et chargerHistorique identiques) ...
+    // --- ACTIONS WHATSAPP ---
+    function ouvrirWhatsApp(type) {
+        const numero = "21646248269"; 
+        let texte = "";
+        
+        if(type === 'paiement') {
+            texte = "Bonjour, j'ai effectué le virement pour l'accès Premium Santé.";
+        } else {
+            const t = document.getElementById('tension').value;
+            const s = document.getElementById('sucre').value;
+            texte = `Bonjour Docteur, voici mes dernières mesures (${patientActuel}) :\nTension : ${t}\nGlycémie : ${s} g/L`;
+        }
+        window.open(`https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(texte)}`, '_blank');
+    }
+
+    function partagerDossier() {
+        const msg = "Voici mon carnet de santé numérique : " + window.location.href;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // --- GESTION DES DONNÉES ---
+    async function ajouterMesure() {
+        const data = {
+            nom: patientActuel,
+            tension: document.getElementById('tension').value,
+            pouls: document.getElementById('pouls').value,
+            spo2: document.getElementById('spo2').value,
+            sucre: document.getElementById('sucre').value
+        };
+        if(!data.tension || !data.sucre) return alert("Veuillez saisir au moins la Tension et le Sucre.");
+
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        alert("✅ Mesures enregistrées !");
+        location.reload();
+    }
+
+    async function ajouterDocument() {
+        const titre = document.getElementById('titreDoc').value;
+        const lien = document.getElementById('lienDoc').value;
+        if(!titre || !lien) return alert("Titre et lien requis.");
+
+        const data = { nom: patientActuel, tension: "DOC", spo2: titre, sucre: lien };
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        alert("📁 Document lié !");
+        location.reload();
+    }
+
+    async function chargerDonnees() {
+        try {
+            const resp = await fetch(API_URL);
+            const data = await resp.json();
+            const mesInfos = data.filter(d => d.nom === patientActuel);
+            
+            const tableBody = document.getElementById('table-body');
+            const analysesList = document.getElementById('analyses-list');
+            tableBody.innerHTML = "";
+            analysesList.innerHTML = "";
+
+            mesInfos.reverse().forEach(d => {
+                if(d.tension === "DOC") {
+                    // C'est un document
+                    analysesList.innerHTML += `<a href="${d.sucre}" target="_blank" class="doc-link"><span>📄 ${d.spo2}</span> <span>👁️</span></a>`;
+                } else {
+                    // C'est une mesure
+                    let dateC = d.date ? new Date(d.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) : "--";
+                    tableBody.innerHTML += `<tr>
+                        <td>${dateC}</td>
+                        <td>${d.tension}</td>
+                        <td>${d.spo2}%</td>
+                        <td style="font-weight:bold; color:var(--primary);">${d.sucre}</td>
+                    </tr>`;
+                }
+            });
+
+            if (mesInfos.length > 0) initGraphique(mesInfos);
+        } catch (e) { console.log("Erreur chargement données"); }
+    }
+
+    function initGraphique(donnees) {
+        const ctx = document.getElementById('santeChart').getContext('2d');
+        const mesures = donnees.filter(d => d.tension !== "DOC").reverse().slice(-7);
+        
+        if(monGraphique) monGraphique.destroy();
+
+        monGraphique = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: mesures.map(d => new Date(d.date).getDate() + "/" + (new Date(d.date).getMonth()+1)),
+                datasets: [{
+                    label: 'Sucre (g/L)',
+                    data: mesures.map(d => d.sucre),
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function toggleRIB() { document.getElementById("zone-rib").classList.toggle('hidden'); }
+    function deconnexion() { localStorage.removeItem('session_patient'); location.reload(); }
 
     window.onload = () => {
         const session = localStorage.getItem('session_patient');
         if(session) lancerApplication(session);
     };
-
-    function toggleRIB() {
-        const x = document.getElementById("zone-rib");
-        x.classList.toggle('hidden');
-    }
-
-    function ouvrirWhatsApp() {
-        const numero = "21646248269"; 
-        const texte = encodeURIComponent("Bonjour, j'ai effectué le virement. Voici mon reçu pour activer mon accès.");
-        window.open("https://api.whatsapp.com/send?phone=" + numero + "&text=" + texte, '_blank');
-    }
-
-    function deconnexion() {
-        localStorage.removeItem('session_patient');
-        location.reload();
-    }
 </script>
-
-
 </body>
 </html>
