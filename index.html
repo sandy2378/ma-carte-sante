@@ -263,34 +263,31 @@
             }
         });
     }
+
+
+
+
 function ouvrirWhatsApp(type) {
-    const tel = "21646248269"; // Votre numéro
-    let msg = "";
-
-    if (type === 'paiement') {
-        msg = "Bonjour, voici mon reçu de paiement pour l'accès Premium.";
-    } else {
-        // On récupère les dernières valeurs saisies pour les mettre dans le message
-        const t = document.getElementById('tension').value || "--";
-        const p = document.getElementById('pouls').value || "--";
-        const s = document.getElementById('sucre').value || "--";
-        const o = document.getElementById('spo2').value || "--";
-        
-        msg = `Bonjour Docteur, voici mes mesures (${patient}) :\n` +
-              `- Tension: ${t}\n` +
-              `- Pouls: ${p} bpm\n` +
-              `- Sucre: ${s} g/L\n` +
-              `- Oxygène: ${o}%`;
-    }
-
-    // Utilisation de api.whatsapp.com pour une meilleure compatibilité mobile
-    const url = "https://api.whatsapp.com/send?phone=" + tel + "&text=" + encodeURIComponent(msg);
+    // 1. On demande à l'utilisateur de saisir le numéro (ou on utilise celui par défaut)
+    let tel = prompt("Entrez le numéro du destinataire (ex: 21646248269) :", "21672220637");
     
-    // Redirection directe au lieu d'ouvrir une nouvelle fenêtre
-    window.location.href = url;
+    if (tel) {
+        let msg = "";
+        if (type === 'paiement') {
+            msg = "Bonjour, voici mon reçu de paiement.";
+        } else {
+            const t = document.getElementById('tension').value || "--";
+            const p = document.getElementById('pouls').value || "--";
+            const s = document.getElementById('sucre').value || "--";
+            
+            msg = `Bonjour Docteur, voici mes dernières mesures :\n- Tension: ${t}\n- Pouls: ${p}\n- Sucre: ${s}`;
+        }
+
+        // 2. On ouvre WhatsApp avec le numéro choisi
+        const url = "https://api.whatsapp.com/send?phone=" + tel + "&text=" + encodeURIComponent(msg);
+        window.location.href = url;
+    }
 }
-
-
 
     function partagerFiche() {
         const url = window.location.href;
