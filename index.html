@@ -264,39 +264,39 @@
         });
     }
 
-function ouvrirWhatsApp(type) {
-    // 1. Récupération du numéro (le vôtre par défaut)
-    const tel = "21646248269"; 
-    let msg = "";
 
+
+
+function ouvrirWhatsApp(type) {
+    // 1. Demander à l'utilisateur de choisir/saisir le numéro
+    let numDestinataire = prompt("Entrez le numéro du destinataire (ex: 21646248269) :", "21646248269");
+    
+    if (!numDestinataire) return; // Annuler si rien n'est saisi
+
+    let message = "";
     if (type === 'paiement') {
-        msg = "Bonjour, j'ai effectué le paiement de 10 DT. Merci d'activer mon accès.";
+        message = "Bonjour, j'ai envoyé mon reçu de paiement.";
     } else {
-        // 2. RÉCUPÉRATION RÉELLE DES DONNÉES DU FORMULAIRE
-        // On utilise les ID exacts de votre interface (tension, pouls, sucre, spo2)
+        // 2. Récupération précise des données du formulaire (Tension, Pouls, etc.)
         const t = document.getElementById('tension').value || "--";
         const p = document.getElementById('pouls').value || "--";
         const s = document.getElementById('sucre').value || "--";
         const o = document.getElementById('spo2').value || "--";
-        const nom = localStorage.getItem('patient_nom') || "Aya";
+        const nom = "Aya"; // Nom du patient visible sur vos captures
 
-        // 3. CONSTRUCTION DU MESSAGE TEXTE (Pas de liens de fichiers locaux)
-        msg = "Bonjour Docteur, voici mes mesures (" + nom + ") :\n" +
-              "• Tension : " + t + "\n" +
-              "• Pouls : " + p + " bpm\n" +
-              "• Sucre : " + s + " g/L\n" +
-              "• Oxygène : " + o + "%";
+        message = `Bonjour Docteur, voici mes mesures (${nom}) :\n` +
+                  `• Tension: ${t}\n` +
+                  `• Pouls: ${p} bpm\n` +
+                  `• Sucre: ${s} g/L\n` +
+                  `• Oxygène: ${o}%`;
     }
 
-    // 4. LIEN UNIVERSEL (Fonctionne sur Android et iPhone)
-    // On utilise api.whatsapp.com au lieu de wa.me pour plus de stabilité
-    const urlwa = "https://api.whatsapp.com/send?phone=" + tel + "&text=" + encodeURIComponent(msg);
+    // 3. Utilisation du lien API universel (plus stable que wa.me)
+    const urlwa = "https://api.whatsapp.com/send?phone=" + numDestinataire + "&text=" + encodeURIComponent(message);
     
-    // 5. REDIRECTION DIRECTE (Évite le blocage des pop-ups)
+    // 4. Redirection directe pour éviter le blocage du navigateur
     window.location.href = urlwa;
 }
-
-
 
 
     function partagerFiche() {
