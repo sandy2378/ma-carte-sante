@@ -16,6 +16,7 @@
 <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
 <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
 
+<link rel="manifest" href="manifest.json">
 
 
     <style>
@@ -41,30 +42,26 @@
     <input type="text" id="user_login" placeholder="Votre Nom">
     <input type="password" id="license_key" placeholder="Code d'activation">
     <button onclick="connexionPayante()" class="btn-save" style="background:#27ae60;">🚀 Activer mon accès</button>
-    <div class="card" style="text-align:center; border: 2px solid #27ae60; padding:15px; border-radius:15px;">
-    <h3 style="color:#2c3e50;">💳 PAIEMENT SÉCURISÉ</h3>
-    <p style="font-size:14px;"><b>Tarif Accès Premium : 10 DT / 10 €</b></p>
     
-    <button id="btn-rib" onclick="montrerRIB()" style="background:#34495e; color:white; font-size:12px; padding:10px; margin-bottom:10px; width:100%;">
-        👁️ Afficher le RIB pour payer
+
+   <div class="card" style="text-align:center; border: 2px solid #2ecc71;">
+    <h3 style="color:#2c3e50;">💳 PAIEMENT SÉCURISÉ</h3>
+    <p>Tarif Accès : 10 DT / 10 €</p>
+    
+    <button onclick="toggleRIB()" style="background:#34495e; color:white; padding:8px; font-size:12px; margin-bottom:10px;">
+        👁️ Voir le RIB pour le virement
     </button>
 
-    <div id="zone-rib" style="display:none; margin-bottom:15px;">
-        <p style="font-size:11px; background:#fff; padding:10px; border:1px dashed #ccc; word-break:break-all;">
-            <b>RIB :</b> TN59 12 30100 00133 06217243
-        </p>
-        <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" 
-                style="background:#2ecc71; color:white; font-size:11px; width:auto; padding:5px 10px;">
-            📋 Copier le RIB
-        </button>
+    <div id="zone-rib" style="display:none; margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:10px;">
+        <p style="font-size:11px;"><b>RIB :</b> TN59 12 30100 00133 06217243</p>
+        <button onclick="navigator.clipboard.writeText('TN5912301000013306217243'); alert('RIB copié !')" style="font-size:10px;">📋 Copier</button>
     </div>
 
-    <button onclick="envoyerPreuveWhatsApp()" style="background:#2ecc71; color:white; font-weight:bold; padding:12px; width:100%; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:8px;">
+    <button onclick="ouvrirWhatsApp()" style="background:#2ecc71; color:white; width:100%; padding:12px; border-radius:10px; font-weight:bold;">
         💬 ENVOYER LE REÇU (WHATSAPP)
     </button>
 </div>
-
-    
+ 
     
 
     </div>
@@ -211,10 +208,19 @@ function envoyerPreuveWhatsApp() {
     window.open(url, '_blank');
 }
 
-// Fonction pour cacher/montrer le RIB
-function toggleRIB() {
-    const zone = document.getElementById('zone-rib');
-    zone.style.display = (zone.style.display === 'none') ? 'block' : 'none';
+
+
+
+    function toggleRIB() {
+    const x = document.getElementById("zone-rib");
+    x.style.display = (x.style.display === "none") ? "block" : "none";
+}
+
+function ouvrirWhatsApp() {
+    // IMPORTANT : Mettez votre numéro sans le + et sans espaces (ex: 21699000000)
+    const numero = "216XXXXXXXX"; 
+    const texte = encodeURIComponent("Bonjour, j'ai fait le virement. Voici mon reçu pour activer mon accès.");
+    window.location.href = "https://api.whatsapp.com/send?phone=" + numero + "&text=" + texte;
 }
 
     function lancerApplication(pseudo) {
