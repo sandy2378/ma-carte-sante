@@ -100,20 +100,42 @@
         } else { alert("Code incorrect"); }
     }
 
-    function lancerApp(nom) {
-        patient = nom;
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('nomAffiche').innerText = nom;
-        
-        setTimeout(() => {
-            const qrDiv = document.getElementById("qrcode");
-            qrDiv.innerHTML = "";
-            new QRCode(qrDiv, { text: window.location.href, width: 140, height: 140 });
-        }, 500);
-        chargerHistorique();
-    }
+    
 
+function lancerApp(nom) {
+    patient = nom;
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    document.getElementById('nomAffiche').innerText = nom;
+    
+    // On force un petit délai pour laisser le temps à l'affichage de se stabiliser
+    setTimeout(() => {
+        const qrDiv = document.getElementById("qrcode");
+        if (qrDiv) {
+            qrDiv.innerHTML = ""; // On vide la zone
+            try {
+                // On crée le QR code avec l'adresse actuelle
+                new QRCode(qrDiv, {
+                    text: window.location.href,
+                    width: 150,
+                    height: 150,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                console.log("QR Code généré avec succès");
+            } catch (e) {
+                console.error("Erreur de génération QR:", e);
+                // Si ça échoue, on réessaie une fois après 1 seconde
+                setTimeout(() => lancerApp(nom), 1000);
+            }
+        }
+    }, 800);
+
+    chargerHistorique();
+}
+
+    
     async function enregistrerDonnees() {
         const d = { nom: patient, tension: document.getElementById('tension').value, pouls: document.getElementById('pouls').value, spo2: document.getElementById('spo2').value, sucre: document.getElementById('sucre').value };
         if(!d.tension || !d.sucre) return alert("Remplissez Tension et Sucre");
