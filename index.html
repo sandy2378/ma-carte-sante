@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Mon Carnet de Santé Pro</title>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -85,8 +86,10 @@
             </div>
             
             <h2 id="nomAffiche" style="margin:20px 0 10px 0;">---</h2>
+            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; border-radius: 10px;"></div>
 
-            <div id="qrcode"></div>
+
+            
             
             <button onclick="partagerFiche()" class="btn-blue">📲 Partager mon Dossier QR</button>
             
@@ -188,6 +191,22 @@ function lancerApp(nom) {
         });
     }, 500);
 }
+function genererMonQR() {
+    const zoneQR = document.getElementById("qrcode");
+    zoneQR.innerHTML = ""; // On vide la zone avant de dessiner
+    
+    new QRCode(zoneQR, {
+        text: window.location.href, // Utilise le lien de votre site actuel
+        width: 150,
+        height: 150,
+        colorDark : "#000000",
+        colorLight : "#ffffff"
+    });
+}
+
+// Appelez cette fonction quand vous voulez que le QR apparaisse
+// Par exemple, juste après la connexion :
+genererMonQR();
 
     
     function initQR() {
