@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Mon Carnet de Santé Pro</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         :root { --danger: #e74c3c; --dark: #2c3e50; --safe: #27ae60; --info: #3498db; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 10px; color: var(--dark); }
         .card { background: white; padding: 18px; border-radius: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .emergency-card { background: red; color: white; padding: 20px; border-radius: 20px; text-align: center; position: relative; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-wa { background: #25D366; color: white; }
-        .btn-logout { background: rgba(0,0,0,0.2); color: white; width: auto; padding: 5px 10px; position: absolute; top: 10px; right: 10px; border-radius: 5px; }
-        #qrcode { background: white; padding: 10px; border-radius: 10px; display: inline-block; margin: 15px 0; }
+        .btn-logout { background: rgba(0,0,0,0.2); color: white; width: auto; padding: 5px 10px; position: absolute; top: 10px; right: 10px; border-radius: 5px; font-size: 12px; }
+        #qrcode { background: white; padding: 10px; border-radius: 10px; display: inline-block; margin: 15px 0; min-height: 150px; min-width: 150px; }
         .doc-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; margin-top: 8px; color: white; text-decoration: none; }
         .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
         th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
     </style>
 </head>
@@ -27,18 +29,18 @@
 
 <div class="container">
     <div id="auth-section" class="card" style="text-align:center;">
-        <h2 style="color:var(--danger);">💎 Accès Premium</h2>
+        <h2 style="color:var(--danger);">💎 Accès Premium Santé</h2>
         <input type="text" id="user_login" placeholder="Nom du patient">
         <input type="password" id="license_key" placeholder="Code d'activation">
         <button onclick="connexion()" style="background:var(--safe); color:white;">🚀 Activer mon Carnet</button>
         
         <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
-            <p style="font-size:12px;">Réglez 10 DT pour activer</p>
-            <button onclick="document.getElementById('rib-info').classList.toggle('hidden')" style="background:#f1f1f1; font-size:11px;">👁️ Afficher le RIB</button>
+            <p style="font-size:12px;">Activation : 10 DT / 10 €</p>
+            <button onclick="document.getElementById('rib-info').classList.toggle('hidden')" style="background:#f1f1f1; font-size:11px;">👁️ Voir RIB</button>
             <div id="rib-info" class="hidden" style="font-size:11px; background:#fafafa; padding:10px; border-radius:10px;">
                 RIB : TN59 12 30100 00133 06217243
             </div>
-            <button onclick="ouvrirWhatsApp('paiement')" class="btn-wa">💬 Envoyer le reçu</button>
+            <button onclick="ouvrirWhatsApp('paiement')" class="btn-wa">💬 Envoyer reçu</button>
         </div>
     </div>
 
@@ -46,18 +48,20 @@
         <div class="emergency-card">
             <button class="btn-logout" onclick="deconnexion()">🚪 Sortir</button>
             <h2>FICHE MÉDICALE 🆘</h2>
-            <p id="nomAffiche" style="font-weight:bold; font-size:20px;">Patient</p>
+            <p id="nomAffiche" style="font-weight:bold; font-size:22px;">Patient</p>
+            
             <div id="qrcode"></div>
+            
             <div id="list-docs-sos"></div>
-            <button onclick="partagerFiche()" style="background:#3498db; color:white;">📲 Partager Dossier QR</button>
+            <button onclick="partagerFiche()" style="background:#3498db; color:white; margin-top:10px;">📲 Partager Dossier QR</button>
         </div>
 
         <div class="card">
             <h3>➕ Nouveau Relevé</h3>
             <div class="grid">
                 <input type="text" id="tension" placeholder="Tension">
-                <input type="number" id="pouls" placeholder="Pouls">
-                <input type="number" id="spo2" placeholder="SpO2 %">
+                <input type="number" id="pouls" placeholder="Pouls ❤">
+                <input type="number" id="spo2" placeholder="Oxygène %">
                 <input type="number" id="sucre" step="0.01" placeholder="Sucre g/L">
             </div>
             <button onclick="enregistrerDonnees()" style="background:var(--dark); color:white;">💾 Enregistrer</button>
@@ -70,13 +74,13 @@
         </div>
 
         <div class="card">
-            <h3>📁 Ajouter un Document</h3>
-            <input type="text" id="titreDoc" placeholder="Titre (ex: Analyse Sang)">
-            <input type="text" id="lienDoc" placeholder="Lien du document">
-            <button onclick="ajouterAnalyse()" style="background:var(--info); color:white;">🖇️ Lier le document</button>
+            <h3>📁 Documents / Analyses</h3>
+            <input type="text" id="titreDoc" placeholder="Titre du document">
+            <input type="text" id="lienDoc" placeholder="Lien (URL)">
+            <button onclick="ajouterAnalyse()" style="background:var(--info); color:white;">🖇️ Ajouter le document</button>
         </div>
 
-        <div class="card">
+        <div class="card" style="overflow-x:auto;">
             <h3>📒 Historique</h3>
             <table>
                 <thead><tr><th>Date</th><th>Tens.</th><th>❤</th><th>Oxy.</th><th>Sucre</th></tr></thead>
@@ -97,59 +101,57 @@
         if (n && ["CLIENT01", "RIM2026", "AYA2026"].includes(c)) {
             localStorage.setItem('patient_nom', n);
             lancerApp(n);
-        } else { alert("Code incorrect"); }
+        } else { alert("❌ Code invalide"); }
     }
 
-    
+    function lancerApp(nom) {
+        patient = nom;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('nomAffiche').innerText = nom;
+        
+        // DESSIN DU QR CODE (avec boucle de sécurité)
+        genererQRAuto();
+        chargerHistorique();
+    }
 
-function lancerApp(nom) {
-    patient = nom;
-    document.getElementById('auth-section').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-    document.getElementById('nomAffiche').innerText = nom;
-    
-    // On force un petit délai pour laisser le temps à l'affichage de se stabiliser
-    setTimeout(() => {
+    function genererQRAuto() {
         const qrDiv = document.getElementById("qrcode");
-        if (qrDiv) {
-            qrDiv.innerHTML = ""; // On vide la zone
-            try {
-                // On crée le QR code avec l'adresse actuelle
-                new QRCode(qrDiv, {
-                    text: window.location.href,
-                    width: 150,
-                    height: 150,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-                console.log("QR Code généré avec succès");
-            } catch (e) {
-                console.error("Erreur de génération QR:", e);
-                // Si ça échoue, on réessaie une fois après 1 seconde
-                setTimeout(() => lancerApp(nom), 1000);
-            }
+        if (!qrDiv) return;
+        
+        qrDiv.innerHTML = ""; // Nettoyage
+        
+        try {
+            new QRCode(qrDiv, {
+                text: window.location.href,
+                width: 150,
+                height: 150,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            console.log("QR Code dessiné");
+        } catch (e) {
+            console.log("Erreur QR, tentative dans 1s...");
+            setTimeout(genererQRAuto, 1000); // Réessaie si la bibliothèque n'est pas prête
         }
-    }, 800);
+    }
 
-    chargerHistorique();
-}
-
-    
     async function enregistrerDonnees() {
         const d = { nom: patient, tension: document.getElementById('tension').value, pouls: document.getElementById('pouls').value, spo2: document.getElementById('spo2').value, sucre: document.getElementById('sucre').value };
-        if(!d.tension || !d.sucre) return alert("Remplissez Tension et Sucre");
+        if(!d.tension || !d.sucre) return alert("Tension et Sucre requis");
         await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(d) });
-        alert("Enregistré !");
+        alert("✅ Données enregistrées");
         chargerHistorique();
     }
 
     async function ajouterAnalyse() {
         const t = document.getElementById('titreDoc').value;
         const l = document.getElementById('lienDoc').value;
+        if(!t || !l) return alert("Champs vides");
         const d = { nom: patient, tension: "DOC", spo2: t, sucre: l, pouls: "" };
         await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(d) });
-        alert("Document ajouté !");
+        alert("📁 Document lié !");
         chargerHistorique();
     }
 
@@ -171,7 +173,7 @@ function lancerApp(nom) {
                 }
             });
             majGraphique(mesDatas);
-        } catch(e) { console.log("Erreur chargement"); }
+        } catch(e) { console.log("Erreur Sync"); }
     }
 
     function majGraphique(donnees) {
@@ -182,30 +184,30 @@ function lancerApp(nom) {
             type: 'line',
             data: {
                 labels: f.map(d => new Date(d.date).getDate() + "/" + (new Date(d.date).getMonth()+1)),
-                datasets: [{ label: 'Glycémie', data: f.map(d => d.sucre), borderColor: 'red', tension: 0.3 }]
+                datasets: [{ label: 'Glycémie (g/L)', data: f.map(d => d.sucre), borderColor: '#e74c3c', tension: 0.3, fill: true, backgroundColor: 'rgba(231, 76, 60, 0.1)' }]
             }
         });
     }
 
     function ouvrirWhatsApp(type) {
-        let num = prompt("Numéro :", "21646248269");
+        let num = prompt("Numéro WhatsApp (ex: 21646248269) :", "21646248269");
         if (!num) return;
         let msg = "";
-        if (type === 'paiement') { msg = "Bonjour, j'ai envoyé mon reçu."; }
+        if (type === 'paiement') { msg = "Bonjour, j'ai envoyé mon reçu de paiement."; }
         else {
             const t = document.getElementById('tension').value || "--";
             const p = document.getElementById('pouls').value || "--";
             const s = document.getElementById('sucre').value || "--";
             const o = document.getElementById('spo2').value || "--";
-            msg = `Mesures (${patient}):\n• Tension: ${t}\n• Pouls: ${p}\n• Sucre: ${s}\n• Oxygène: ${o}%`;
+            msg = `Bonjour Docteur, voici mes mesures (${patient}) :\n• Tension: ${t}\n• Pouls: ${p} bpm\n• Sucre: ${s} g/L\n• Oxygène: ${o}%`;
         }
         window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
     }
 
     function partagerFiche() {
-        let num = prompt("Numéro :", "21646248269");
+        let num = prompt("Numéro WhatsApp pour partager :", "21646248269");
         if (!num) return;
-        const msg = `🆘 URGENCE - Dossier de ${patient} :\n${window.location.href}`;
+        const msg = `🆘 URGENCE - FICHE MÉDICALE\nAccès au dossier de ${patient} :\n${window.location.href}`;
         window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
     }
 
