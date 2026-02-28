@@ -78,21 +78,19 @@
     </div>
 
     <div id="main-content" class="hidden">
+
+<div class="emergency-card" style="background: red; color: white; text-align: center; padding: 20px; border-radius: 20px;">
+    <h2>FICHE MÉDICALE 🆘</h2>
+    <p id="nomAffiche" style="font-weight: bold; font-size: 20px;">Patient</p>
+    
+    <div id="qrcode" style="background: white; padding: 10px; display: inline-block; border-radius: 10px; margin: 10px auto;"></div>
+    
+    <br>
+    <button onclick="partagerFiche()" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 10px; margin-top: 10px;">📲 Partager mon Dossier QR</button>
+</div>
+
         
-        <div class="emergency-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:bold; letter-spacing:1px;">FICHE MÉDICALE 🆘</span>
-                <button onclick="deconnexion()" style="width:auto; padding:5px 10px; background:rgba(0,0,0,0.3); color:white; font-size:10px;">Quitter</button>
-            </div>
-            
-            <h2 id="nomAffiche" style="margin:20px 0 10px 0;">---</h2>
-            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; border-radius: 10px;"></div>
-
-
-            
-            
-            <button onclick="partagerFiche()" class="btn-blue">📲 Partager mon Dossier QR</button>
-            
+                    
             <div id="docs-sos-container" style="text-align:left; margin-top:20px;">
                 <p style="font-size:12px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:5px;">📂 DOCUMENTS & ANALYSES :</p>
                 <div id="list-docs-sos"></div>
@@ -191,22 +189,7 @@ function lancerApp(nom) {
         });
     }, 500);
 }
-function genererMonQR() {
-    const zoneQR = document.getElementById("qrcode");
-    zoneQR.innerHTML = ""; // On vide la zone avant de dessiner
-    
-    new QRCode(zoneQR, {
-        text: window.location.href, // Utilise le lien de votre site actuel
-        width: 150,
-        height: 150,
-        colorDark : "#000000",
-        colorLight : "#ffffff"
-    });
-}
 
-// Appelez cette fonction quand vous voulez que le QR apparaisse
-// Par exemple, juste après la connexion :
-genererMonQR();
 
     
     function initQR() {
@@ -219,6 +202,23 @@ genererMonQR();
             });
         } catch(e) { setTimeout(initQR, 1000); }
     }
+
+
+
+    function afficherLeQR() {
+    const zoneQR = document.getElementById("qrcode");
+    if (!zoneQR) return; // Sécurité si la zone n'existe pas encore
+    
+    zoneQR.innerHTML = ""; // Efface l'ancien code pour mettre le nouveau
+    
+    new QRCode(zoneQR, {
+        text: window.location.href, 
+        width: 150,
+        height: 150,
+        colorDark : "#000000",
+        colorLight : "#ffffff"
+    });
+}
 
     async function enregistrerDonnees() {
         const d = {
