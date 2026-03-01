@@ -105,37 +105,41 @@
     }
 
     function lancerApp(nom) {
-        patient = nom;
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('nomAffiche').innerText = nom;
-        
-        // DESSIN DU QR CODE (avec boucle de sécurité)
-        genererQRAuto();
-        chargerHistorique();
-    }
+    patient = nom;
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    document.getElementById('nomAffiche').innerText = nom;
+    
+    // On lance la tentative de génération
+    tenterGenerationQR();
+    chargerHistorique();
+}
 
-    function genererQRAuto() {
-        const qrDiv = document.getElementById("qrcode");
-        if (!qrDiv) return;
-        
-        qrDiv.innerHTML = ""; // Nettoyage
-        
-        try {
-            new QRCode(qrDiv, {
-                text: window.location.href,
-                width: 150,
-                height: 150,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-            console.log("QR Code dessiné");
-        } catch (e) {
-            console.log("Erreur QR, tentative dans 1s...");
-            setTimeout(genererQRAuto, 1000); // Réessaie si la bibliothèque n'est pas prête
-        }
+function tenterGenerationQR() {
+    const qrDiv = document.getElementById("qrcode");
+    if (!qrDiv) return;
+
+    // On vérifie si la bibliothèque QRCode existe
+    if (typeof QRCode !== "undefined") {
+        qrDiv.innerHTML = ""; // On vide
+        new QRCode(qrDiv, {
+            text: window.location.href,
+            width: 160,
+            height: 160,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        console.log("QR Code généré avec succès !");
+    } else {
+        // Si la bibliothèque n'est pas encore là, on attend 1 seconde et on recommence
+        console.log("En attente de la bibliothèque... nouvel essai dans 1s");
+        setTimeout(tenterGenerationQR, 1000);
     }
+}
+
+
+
 
     async function enregistrerDonnees() {
         const d = { nom: patient, tension: document.getElementById('tension').value, pouls: document.getElementById('pouls').value, spo2: document.getElementById('spo2').value, sucre: document.getElementById('sucre').value };
