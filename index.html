@@ -104,16 +104,24 @@
         } else { alert("❌ Code invalide"); }
     }
 
-    function lancerApp(nom) {
-    patient = nom;
-    document.getElementById('auth-section').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-    document.getElementById('nomAffiche').innerText = nom;
+function lancerApplication(pseudo) {
+    patientActuel = pseudo;
+    document.getElementById('auth-container').style.display = "none";
+    document.getElementById('main-content').style.display = "block";
+    document.getElementById('nomAffiche').innerText = "Patient : " + (pseudo.charAt(0).toUpperCase() + pseudo.slice(1));
     
-    // On lance la tentative de génération
-    tenterGenerationQR();
+    // On vide et on attend 500ms avant de dessiner
+    const qrDiv = document.getElementById("qrcode");
+    qrDiv.innerHTML = ""; 
+    setTimeout(() => {
+        new QRCode(qrDiv, { text: window.location.href, width: 100, height: 100 });
+    }, 500);
+    
     chargerHistorique();
 }
+
+    
+
 
 function tenterGenerationQR() {
     const qrDiv = document.getElementById("qrcode");
@@ -208,17 +216,25 @@ function tenterGenerationQR() {
         window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
     }
 
-    function partagerFiche() {
-    let num = prompt("Numéro WhatsApp du destinataire (ex: 21646248269) :", "21646248269");
+function partagerQR() {
+    // On demande le numéro (ex: 216...)
+    let num = document.getElementById('telDocteur').value.replace(/\s+/g, '');
+    if (!num) {
+        num = prompt("Entrez le numéro WhatsApp du destinataire (ex: 21646248269) :", "21646248269");
+    }
+    
     if (!num) return;
 
-    // On utilise l'adresse exacte de votre site
-    const urlDossier = "https://sandy2378.github.io/ma-carte-sante/";
-    const msg = `🆘 *URGENCE - FICHE MÉDICALE*\n\nVoici l'accès au dossier de santé de *${patient}*.\nCliquez sur le lien pour voir les mesures et le QR Code :\n${urlDossier}`;
+    // On prépare le message avec le LIEN de ton site
+    const urlDossier = window.location.href;
+    const msg = `🆘 *URGENCE - FICHE MÉDICALE*\n\nAccès au dossier de santé de *${patientActuel}*.\nCliquez ici pour voir les mesures et le QR Code :\n${urlDossier}`;
 
-    // Ouverture de WhatsApp avec le message texte uniquement
-    window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
+    // On ouvre WhatsApp avec le texte
+    window.open(`https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`, '_blank');
 }
+
+    
+    
 
 
     
