@@ -205,11 +205,20 @@
     }
 
     function partagerFiche() {
-        let num = prompt("Numéro WhatsApp pour partager :", "21646248269");
-        if (!num) return;
-        const msg = `🆘 URGENCE - FICHE MÉDICALE\nAccès au dossier de ${patient} :\n${window.location.href}`;
-        window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
-    }
+    let num = prompt("Numéro WhatsApp du destinataire (ex: 21646248269) :", "21646248269");
+    if (!num) return;
+
+    // On utilise l'adresse exacte de votre site
+    const urlDossier = "https://sandy2378.github.io/ma-carte-sante/";
+    const msg = `🆘 *URGENCE - FICHE MÉDICALE*\n\nVoici l'accès au dossier de santé de *${patient}*.\nCliquez sur le lien pour voir les mesures et le QR Code :\n${urlDossier}`;
+
+    // Ouverture de WhatsApp avec le message texte uniquement
+    window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
+}
+
+
+    
+
 
     function deconnexion() { localStorage.removeItem('patient_nom'); location.reload(); }
 
