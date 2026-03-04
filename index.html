@@ -95,7 +95,6 @@
         </div>
     </div>
 </div>
-
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxuLa5Cy51xZ1d8LK-5o0Jd68N8Rz5OMRCvC9U3T80R4Arq-wUQQMD-VgdZzbBZ8c-t/exec";
     let patient = "";
@@ -109,40 +108,65 @@
             lancerApp(n);
         } else { alert("❌ Code invalide"); }
     }
-function lancerApp(pseudo) {
-    patient = pseudo; // Utilise la variable 'patient' définie en haut de ton script
-    document.getElementById('auth-section').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-    document.getElementById('nomAffiche').innerText = "Patient : " + (pseudo.charAt(0).toUpperCase() + pseudo.slice(1));
-    
-    // On lance la génération du QR Code
-    tenterGenerationQR();
-    chargerHistorique();
-}
 
+    function lancerApp(pseudo) {
+        patient = pseudo;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('nomAffiche').innerText = "Patient : " + (pseudo.charAt(0).toUpperCase() + pseudo.slice(1));
+        
+        // On génère le QR Code immédiatement
+        tenterGenerationQR();
+        chargerHistorique();
+    }
 
-function tenterGenerationQR() {
-    const qrDiv = document.getElementById("qrcode");
-    if (!qrDiv) return;
-
-    // On vérifie si la bibliothèque QRCode existe
-    if (typeof QRCode !== "undefined") {
-        qrDiv.innerHTML = ""; // On vide
+    function tenterGenerationQR() {
+        const qrDiv = document.getElementById("qrcode");
+        if (!qrDiv) return;
+        qrDiv.innerHTML = ""; 
+        
+        // Utilisation simple de la bibliothèque
         new QRCode(qrDiv, {
             text: window.location.href,
-            width: 160,
-            height: 160,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
+            width: 150,
+            height: 150,
             correctLevel : QRCode.CorrectLevel.H
         });
-        console.log("QR Code généré avec succès !");
-    } else {
-        // Si la bibliothèque n'est pas encore là, on attend 1 seconde et on recommence
-        console.log("En attente de la bibliothèque... nouvel essai dans 1s");
-        setTimeout(tenterGenerationQR, 1000);
     }
-}
+
+    // --- LA FONCTION DE PARTAGE QUI MARCHE (IMAGE + LIEN) ---
+    async function partagerFiche() {
+        // On récupère le canvas (le dessin du QR)
+        const canvas = document.querySelector('#qrcode canvas');
+        if (!canvas) {
+            alert("QR Code en cours de création... réessayez.");
+            return;
+        }
+
+        try {
+            // Conversion en image pour le téléphone
+            const dataUrl = canvas.toDataURL("image/png");
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], 'qr_sante.png', { type: 'image/png' });
+
+            // Menu de partage natif (iPhone/Android)
+            if (navigator.share) {
+                await navigator.share({
+                    title: 'Urgence Santé',
+                    text: `Dossier Médical de ${patient} : ${window.location.href}`,
+                    files: [file]
+                });
+            } else {
+                alert("Le partage d'image n'est pas supporté. Faites une capture d'écran.");
+            }
+        } catch (err) {
+            // Secours : si l'image bloque, on partage au moins le lien
+            navigator.share({
+                title: 'Urgence Santé',
+                text: `Lien du dossier de ${patient} : ${window.location.href}`
+            }).catch(() => alert("Erreur de partage."));
+        }
+    }
 
     async function enregistrerDonnees() {
         const d = { nom: patient, tension: document.getElementById('tension').value, pouls: document.getElementById('pouls').value, spo2: document.getElementById('spo2').value, sucre: document.getElementById('sucre').value };
@@ -169,11 +193,13 @@ function tenterGenerationQR() {
             const mesDatas = data.filter(i => i.nom === patient);
             const tbody = document.getElementById('table-body');
             const docList = document.getElementById('list-docs-sos');
-            tbody.innerHTML = ""; docList.innerHTML = "";
+            if(!tbody) return;
+            tbody.innerHTML = ""; 
+            if(docList) docList.innerHTML = "";
 
             mesDatas.reverse().forEach(x => {
                 if(x.tension === "DOC") {
-                    docList.innerHTML += `<a href="${x.sucre}" target="_blank" class="doc-item"><span>📄 ${x.spo2}</span> <span>👁️</span></a>`;
+                    if(docList) docList.innerHTML += `<a href="${x.sucre}" target="_blank" class="doc-item"><span>📄 ${x.spo2}</span> <span>👁️</span></a>`;
                 } else {
                     let dt = x.date ? new Date(x.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) : "--";
                     tbody.innerHTML += `<tr><td>${dt}</td><td>${x.tension}</td><td>${x.pouls}</td><td>${x.spo2}%</td><td>${x.sucre}</td></tr>`;
@@ -184,7 +210,9 @@ function tenterGenerationQR() {
     }
 
     function majGraphique(donnees) {
-        const ctx = document.getElementById('santeChart').getContext('2d');
+        const chartEl = document.getElementById('santeChart');
+        if(!chartEl) return;
+        const ctx = chartEl.getContext('2d');
         const f = donnees.filter(d => d.tension !== "DOC").reverse().slice(-7);
         if(monGraphique) monGraphique.destroy();
         monGraphique = new Chart(ctx, {
@@ -211,54 +239,6 @@ function tenterGenerationQR() {
         window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
     }
 
-async function partagerFiche() {
-    // 1. On cherche l'image du QR Code (le canvas généré par la bibliothèque)
-    const qrCanvas = document.querySelector('#qrcode canvas');
-    
-    if (!qrCanvas) {
-        alert("QR Code non trouvé. Essayez de vous reconnecter.");
-        return;
-    }
-
-    try {
-        // 2. On transforme le dessin du QR en un fichier image PNG
-        const dataUrl = qrCanvas.toDataURL("image/png");
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], 'qr_sante.png', { type: blob.type });
-
-        // 3. On utilise le menu de partage du téléphone (navigator.share)
-        if (navigator.share) {
-            await navigator.share({
-                title: 'Fiche Médicale SOS',
-                text: `Accès au dossier de ${patient} : ${window.location.href}`,
-                files: [file] // C'est cette ligne qui envoie l'image !
-            });
-        } else {
-            alert("Le partage n'est pas supporté sur ce navigateur. Faites une capture d'écran.");
-        }
-    } catch (err) {
-        console.error("Erreur de partage:", err);
-        // Si le partage de fichier échoue, on tente de partager au moins le lien
-        navigator.share({
-            title: 'Fiche Médicale SOS',
-            text: `Accès au dossier de ${patient} : ${window.location.href}`
-        }).catch(() => alert("Erreur de partage."));
-    }
-}
-
-    
-    
-new QRCode(qrDiv, {
-    text: window.location.href,
-    width: 140, // Un peu plus petit pour mieux passer sur mobile
-    height: 140,
-    // ... reste du code
-
-
-
-    
-
-
     function deconnexion() { localStorage.removeItem('patient_nom'); location.reload(); }
 
     window.onload = () => {
@@ -266,5 +246,7 @@ new QRCode(qrDiv, {
         if(s) lancerApp(s);
     };
 </script>
+
+
 </body>
 </html>
