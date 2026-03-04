@@ -211,19 +211,49 @@ function tenterGenerationQR() {
         window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`;
     }
 
-
+async function partagerFiche() {
+    // 1. On cherche l'image du QR Code (le canvas généré par la bibliothèque)
+    const qrCanvas = document.querySelector('#qrcode canvas');
     
-    
-function partagerFiche() {
-    let num = prompt("Numéro WhatsApp du destinataire (ex: 21646248269) :", "21646248269");
-    if (!num) return;
+    if (!qrCanvas) {
+        alert("QR Code non trouvé. Essayez de vous reconnecter.");
+        return;
+    }
 
-    const urlDossier = window.location.href;
-    // On utilise 'patient' ici car c'est le nom de ta variable globale
-    const msg = `🆘 *URGENCE - FICHE MÉDICALE*\n\nAccès au dossier de santé de *${patient}*.\nCliquez ici :\n${urlDossier}`;
+    try {
+        // 2. On transforme le dessin du QR en un fichier image PNG
+        const dataUrl = qrCanvas.toDataURL("image/png");
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], 'qr_sante.png', { type: blob.type });
 
-    window.open(`https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`, '_blank');
+        // 3. On utilise le menu de partage du téléphone (navigator.share)
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Fiche Médicale SOS',
+                text: `Accès au dossier de ${patient} : ${window.location.href}`,
+                files: [file] // C'est cette ligne qui envoie l'image !
+            });
+        } else {
+            alert("Le partage n'est pas supporté sur ce navigateur. Faites une capture d'écran.");
+        }
+    } catch (err) {
+        console.error("Erreur de partage:", err);
+        // Si le partage de fichier échoue, on tente de partager au moins le lien
+        navigator.share({
+            title: 'Fiche Médicale SOS',
+            text: `Accès au dossier de ${patient} : ${window.location.href}`
+        }).catch(() => alert("Erreur de partage."));
+    }
 }
+
+    
+    
+new QRCode(qrDiv, {
+    text: window.location.href,
+    width: 140, // Un peu plus petit pour mieux passer sur mobile
+    height: 140,
+    // ... reste du code
+
 
 
     
