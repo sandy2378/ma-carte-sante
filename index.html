@@ -121,27 +121,28 @@ function lancerApp(pseudo) {
 }
 
 
+function tenterGenerationQR() {
+    const qrDiv = document.getElementById("qrcode");
+    if (!qrDiv) return;
 
-    
-
-
-
-
-// --- PARTAGES & QR ---
-    async function partagerQR() {
-        const qrCanvas = document.querySelector('#qrcode canvas');
-        if (!qrCanvas) return alert("QR Code non trouvé");
-        const dataUrl = qrCanvas.toDataURL("image/png");
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], 'qr_sante.png', { type: blob.type }); 
-
-        if (navigator.share) {
-            navigator.share({ files: [file], title: 'Accès Urgence Rim Ayari' }).catch(console.error);
-        } else {
-            alert("Partage non supporté. Faites une capture d'écran.");
-        }
-    } 
-
+    // On vérifie si la bibliothèque QRCode existe
+    if (typeof QRCode !== "undefined") {
+        qrDiv.innerHTML = ""; // On vide
+        new QRCode(qrDiv, {
+            text: window.location.href,
+            width: 160,
+            height: 160,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        console.log("QR Code généré avec succès !");
+    } else {
+        // Si la bibliothèque n'est pas encore là, on attend 1 seconde et on recommence
+        console.log("En attente de la bibliothèque... nouvel essai dans 1s");
+        setTimeout(tenterGenerationQR, 1000);
+    }
+}
 
     async function enregistrerDonnees() {
         const d = { nom: patient, tension: document.getElementById('tension').value, pouls: document.getElementById('pouls').value, spo2: document.getElementById('spo2').value, sucre: document.getElementById('sucre').value };
