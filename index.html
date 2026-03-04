@@ -148,7 +148,20 @@ function tenterGenerationQR() {
     }
 }
 
+// --- PARTAGES & QR ---
+    async function partagerQR() {
+        const qrCanvas = document.querySelector('#qrcode canvas');
+        if (!qrCanvas) return alert("QR Code non trouvé");
+        const dataUrl = qrCanvas.toDataURL("image/png");
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], 'qr_sante.png', { type: blob.type }); 
 
+        if (navigator.share) {
+            navigator.share({ files: [file], title: 'Accès Urgence Rim Ayari' }).catch(console.error);
+        } else {
+            alert("Partage non supporté. Faites une capture d'écran.");
+        }
+    } 
 
 
     async function enregistrerDonnees() {
