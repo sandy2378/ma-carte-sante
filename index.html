@@ -28,25 +28,19 @@
 <body>
 
 <div class="container">
-    <div id="auth-section" class="card" style="text-align:center;">
-        <h2 style="color:var(--danger);">💎 Accès Premium Santé</h2>
-        <input type="text" id="user_login" placeholder="Votre Nom (ex: Aya)">
-<input type="password" id="license_key" placeholder="Code d'activation">
-        <button onclick="connexion()" class="btn-green">🚀 Activer mon Carnet</button>
-
-
+        <div id="auth-section" class="card" style="text-align:center;">
+        <h2 style="color:var(--safe);">🌿 Carnet de Santé Gratuit</h2>
+        <p style="font-size: 13px; color: #666;">Entrez votre prénom pour commencer votre suivi</p>
+        <input type="text" id="user_login" placeholder="Votre Prénom">
+        <button onclick="connexion()" style="background:var(--safe); color:white;">🚀 Ouvrir mon Espace</button>
         
-        
-        
-        <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
-            <p style="font-size:12px;">Activation : 10 DT / 10 €</p>
-            <button onclick="document.getElementById('rib-info').classList.toggle('hidden')" style="background:#f1f1f1; font-size:11px;">👁️ Voir RIB</button>
-            <div id="rib-info" class="hidden" style="font-size:11px; background:#fafafa; padding:10px; border-radius:10px;">
-                RIB : TN59 12 30100 00133 06217243
-            </div>
-            <button onclick="ouvrirWhatsApp('paiement')" class="btn-wa">💬 Envoyer reçu</button>
-        </div>
+        <p style="font-size:11px; margin-top:15px; color:#999;">
+            Service offert gratuitement par Raya. <br>
+            Vos données sont sécurisées et privées.
+        </p>
     </div>
+
+    
 
     <div id="main-content" class="hidden">
         <div class="emergency-card">
@@ -100,13 +94,16 @@
     let patient = "";
     let monGraphique = null;
 
+    
     function connexion() {
         const n = document.getElementById('user_login').value.trim();
-        const c = document.getElementById('license_key').value.trim();
-        if (n && ["CLIENT01", "RIM2026", "AYA2026"].includes(c)) {
+        // On ne vérifie plus le code, on demande juste un nom pour créer le dossier
+        if (n.length >= 2) {
             localStorage.setItem('patient_nom', n);
             lancerApp(n);
-        } else { alert("❌ Code invalide"); }
+        } else { 
+            alert("⚠️ Veuillez entrer votre nom pour accéder à votre carnet."); 
+        }
     }
 
     function lancerApp(pseudo) {
